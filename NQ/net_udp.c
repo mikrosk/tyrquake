@@ -28,6 +28,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <errno.h>
 #include <unistd.h>
 #include <net/if.h>
+#ifdef __MINT__
+#include <fcntl.h>
+#endif
 
 #include "common.h"
 #include "console.h"
@@ -239,11 +242,20 @@ UDP_OpenSocket(int port)
 {
     int newsocket;
     struct sockaddr_in address;
+#ifndef __MINT__
     int _true = 1;
+#else
+    int flags;
+#endif
 
     if ((newsocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 	return -1;
+#ifndef __MINT__
     if (ioctl(newsocket, FIONBIO, &_true) == -1)
+#else
+    flags = fcntl (newsocket, F_GETFL, 0);
+    if (fcntl(newsocket, F_SETFL, flags | O_NONBLOCK) == -1)
+#endif
 	goto ErrorReturn;
 
     address.sin_family = AF_INET;

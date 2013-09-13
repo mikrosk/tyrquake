@@ -28,6 +28,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <arpa/inet.h>
 #include <errno.h>
 #include <unistd.h>
+#ifdef __MINT__
+#include <fcntl.h>
+#endif
 
 #include "console.h"
 #include "net.h"
@@ -193,12 +196,21 @@ UDP_OpenSocket(int port)
 {
     int newsocket;
     struct sockaddr_in address;
+#ifndef __MINT__
     int _true = 1;
+#else
+    int flags;
+#endif
     int i;
 
     if ((newsocket = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
 	Sys_Error("%s: socket: %s", __func__, strerror(errno));
+#ifndef __MINT__
     if (ioctl(newsocket, FIONBIO, &_true) == -1)
+#else
+    flags = fcntl (newsocket, F_GETFL, 0);
+    if (fcntl(newsocket, F_SETFL, flags | O_NONBLOCK) == -1)
+#endif
 	Sys_Error("%s: ioctl FIONBIO: %s", __func__, strerror(errno));
     address.sin_family = AF_INET;
 
