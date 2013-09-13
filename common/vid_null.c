@@ -22,6 +22,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "quakedef.h"
 #include "d_local.h"
 
+#ifdef NQ_HACK
+#include "host.h"
+#endif
+#ifdef QW_HACK
+#include "client.h"
+#endif
+
+
 viddef_t vid;			// global video state
 
 #define	BASEWIDTH	320
@@ -34,18 +42,20 @@ byte surfcache[256 * 1024];
 unsigned short d_8to16table[256];
 unsigned d_8to24table[256];
 
+int vid_modenum = VID_MODE_NONE;
+
 void
-VID_SetPalette(unsigned char *palette)
+VID_SetPalette(const byte *palette)
 {
 }
 
 void
-VID_ShiftPalette(unsigned char *palette)
+VID_ShiftPalette(const byte *palette)
 {
 }
 
 void
-VID_Init(unsigned char *palette)
+VID_Init(const byte *palette)
 {
     vid.maxwarpwidth = vid.width = vid.conwidth = BASEWIDTH;
     vid.maxwarpheight = vid.height = vid.conheight = BASEHEIGHT;
@@ -89,4 +99,57 @@ D_EndDirectRect
 void
 D_EndDirectRect(int x, int y, int width, int height)
 {
+}
+
+
+/*
+====================
+VID_CheckAdequateMem
+====================
+*/
+qboolean
+VID_CheckAdequateMem(int width, int height)
+{
+    int tbuffersize;
+
+    tbuffersize = width * height * sizeof(*d_pzbuffer);
+    tbuffersize += D_SurfaceCacheForRes(width, height);
+
+    /*
+     * see if there's enough memory, allowing for the normal mode 0x13 pixel,
+     * z, and surface buffers
+     */
+    if ((host_parms.memsize - tbuffersize + SURFCACHE_SIZE_AT_320X200 +
+	 0x10000 * 3) < minimum_memory)
+	return false;
+
+    return true;
+}
+
+
+void
+VID_LockBuffer(void)
+{
+}
+
+void
+VID_UnlockBuffer(void)
+{
+}
+
+qboolean
+VID_SetMode(const qvidmode_t *mode, const byte *palette)
+{
+    return true;
+}
+
+// it's in sys_null.c, too but we don't use it
+void
+IN_ProcessEvents(void)
+{
+}
+void
+Sys_SendKeyEvents(void)
+{
+    IN_ProcessEvents();
 }

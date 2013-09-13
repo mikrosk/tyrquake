@@ -15,6 +15,7 @@ DIST_DIR         ?= dist
 DEBUG            ?= N# Compile with debug info
 OPTIMIZED_CFLAGS ?= Y# Enable compiler optimisations (if DEBUG != Y)
 USE_X86_ASM      ?= $(I386_GUESS)
+USE_M68K_ASM     ?= N
 USE_SDL          ?= N# New (experimental) SDL video/sound/input targets
 LOCALBASE        ?= /usr/local
 QBASEDIR         ?= .# Default basedir for quake data files (Linux/BSD only)
@@ -51,28 +52,20 @@ TOPDIR := $(shell pwd)
 
 ifneq (,$(findstring MINGW32,$(SYSNAME)))
 HOST_OS = WIN32
-else
-ifneq (,$(findstring $(SYSNAME),FreeBSD NetBSD))
+else ifneq (,$(findstring $(SYSNAME),FreeBSD NetBSD))
 HOST_OS = UNIX
 HOST_UNIX = bsd
-else
-ifneq (,$(findstring $(SYSNAME),OpenBSD))
+else ifneq (,$(findstring $(SYSNAME),OpenBSD))
 HOST_OS = UNIX
 HOST_UNIX = openbsd
-else
-ifneq (,$(findstring $(SYSNAME),Darwin))
+else ifneq (,$(findstring $(SYSNAME),Darwin))
 HOST_OS = UNIX
 HOST_UNIX = darwin
-else
-ifneq (,$(findstring $(SYSNAME),Linux))
+else ifneq (,$(findstring $(SYSNAME),Linux))
 HOST_OS = UNIX
 HOST_UNIX = linux
 else
 $(error OS type not detected.)
-endif
-endif
-endif
-endif
 endif
 
 # --------------------------------------------------------------------
@@ -95,6 +88,14 @@ SND_TARGET ?= sdl
 CD_TARGET ?= null
 USE_XF86DGA ?= N
 SNAPSHOT_TARGET = $(DIST_DIR)/tyrquake-$(TYR_VERSION_NUM)-osx.dmg
+else ifeq ($(TARGET_UNIX),mint)
+VID_TARGET ?= null
+IN_TARGET ?= null
+SND_TARGET ?= null
+CD_TARGET ?= null
+USE_XF86DGA ?= N
+USE_X86_ASM ?= N
+USE_M68K_ASM ?= Y
 else
 # All other unix can default to X11
 VID_TARGET ?= x11
@@ -115,10 +116,7 @@ CD_TARGET ?= linux
 SND_TARGET ?= oss
 USE_XF86DGA ?= Y
 endif
-endif
-
-ifneq (,$(findstring $(TARGET_OS),WIN32 WIN64))
-EXT = .exe
+else ifneq (,$(findstring $(TARGET_OS),WIN32 WIN64))
 CD_TARGET ?= win
 VID_TARGET ?= win
 IN_TARGET ?= win
@@ -138,8 +136,7 @@ CC = $(TARGET)-gcc
 STRIP = $(TARGET)-strip
 WINDRES = $(TARGET)-windres
 endif
-else
-ifeq ($(TARGET_OS),WIN64)
+else ifeq ($(TARGET_OS),WIN64)
 EXT=.exe
 ifneq ($(HOST_OS),WIN64)
 TARGET ?= $(MINGW64_CROSS_GUESS)
@@ -147,9 +144,16 @@ CC = $(TARGET)-gcc
 STRIP = $(TARGET)-strip
 WINDRES = $(TARGET)-windres
 endif
+else ifeq ($(TARGET_OS),UNIX)
+ifeq ($(TARGET_UNIX),mint)
+EXT=.ttp
+TARGET ?= m68k-atari-mint
+CC = $(TARGET)-gcc
+STRIP = $(TARGET)-strip -s
+STACK = $(TARGET)-stack --fix=512k
+endif
 else
 EXT=
-endif
 endif
 
 # For generating html/text documentation
@@ -259,14 +263,14 @@ DX_INC    = $(TOPDIR)/wine-dx
 
 STRIP   ?= strip
 WINDRES ?= windres
+STACK   ?=
 
 CFLAGS ?=
 CFLAGS := $(CFLAGS) -Wall -Wno-trigraphs -Wwrite-strings
 
 ifeq ($(DEBUG),Y)
 CFLAGS += -g
-else
-ifeq ($(OPTIMIZED_CFLAGS),Y)
+else ifeq ($(OPTIMIZED_CFLAGS),Y)
 CFLAGS += -O2
 # -funit-at-a-time is buggy for MinGW GCC > 3.2
 # I'm assuming it's fixed for MinGW GCC >= 4.0 when that comes about
@@ -276,6 +280,9 @@ CFLAGS += $(call cc-option,-fweb,)
 CFLAGS += $(call cc-option,-frename-registers,)
 CFLAGS += $(call cc-option,-ffast-math,)
 endif
+
+ifeq ($(TARGET_UNIX),mint)
+CFLAGS += -Dfloorf=floor -m68060
 endif
 
 # --------------------------------------------------------------------------
@@ -290,9 +297,10 @@ QWSWDIR	= $(BUILD_DIR)/qwsw
 QWGLDIR	= $(BUILD_DIR)/qwgl
 QWSVDIR	= $(BUILD_DIR)/qwsv
 
-APPS =	tyr-quake$(EXT) tyr-glquake$(EXT) \
-	tyr-qwcl$(EXT) tyr-glqwcl$(EXT) \
-	tyr-qwsv$(EXT)
+APPS = tyr-quake$(EXT) tyr-qwcl$(EXT) tyr-qwsv$(EXT)
+ifneq ($(TARGET_UNIX),mint)
+APPS += tyr-glquake$(EXT) tyr-glqwcl$(EXT)
+endif
 
 default:	all
 
@@ -399,6 +407,9 @@ endef
 quiet_cmd_strip = '  STRIP    $(1)'
       cmd_strip = $(STRIP) $(1)
 
+quiet_cmd_strip = '  STACK    $(1)'
+      cmd_strip = $(STACK) $(1)
+
 ifeq ($(DEBUG),Y)
 do_strip=
 else
@@ -408,6 +419,19 @@ else
 define do_strip
 	@echo $(call $(quiet)cmd_strip,$(1));
 	@$(call cmd_strip,$(1));
+endef
+endif
+endif
+
+ifeq ($(TARGET_UNIX),mint)
+do_stack=
+else
+ifeq ($(STACK),)
+do_stack=
+else
+define do_strip
+	@echo $(call $(quiet)cmd_stack,$(1));
+	@$(call cmd_stack,$(1));
 endef
 endif
 endif
@@ -564,6 +588,7 @@ $(info .        DEBUG = $(DEBUG))
 $(info .    TARGET_OS = $(TARGET_OS))
 $(info .  TARGET_UNIX = $(TARGET_UNIX))
 $(info .  USE_X86_ASM = $(USE_X86_ASM))
+$(info . USE_M68K_ASM = $(USE_M68K_ASM))
 $(info .    CD_TARGET = $(CD_TARGET))
 $(info .   SND_TARGET = $(SND_TARGET))
 $(info .   VID_TARGET = $(VID_TARGET))
@@ -788,6 +813,9 @@ COMMON_OBJS += modela.o
 SW_OBJS   += d_draw.o d_draw16.o d_parta.o d_polysa.o d_scana.o d_spr8.o \
 	     d_varsa.o r_aclipa.o r_aliasa.o r_drawa.o r_edgea.o r_varsa.o \
 	     surf8.o surf16.o
+else ifeq ($(USE_M68K_ASM),Y)
+COMMON_CPPFLAGS += -DUSE_M68k_ASM
+SW_OBJS += nonintel.o	# TODO: remove
 else
 SW_OBJS += nonintel.o
 endif
@@ -822,7 +850,11 @@ endif
 QWSV_LFLAGS += -mconsole
 endif
 ifeq ($(TARGET_OS),UNIX)
+ifneq ($(TARGET_UNIX),mint)
 COMMON_CPPFLAGS += -DELF
+else
+COMMON_LFLAGS += -m68060
+endif
 COMMON_OBJS += net_udp.o sys_unix.o
 COMMON_LIBS += m
 NQCL_OBJS   += net_bsd.o
@@ -850,7 +882,9 @@ endif
 # 1. Video driver
 # ----------------
 
-ifeq ($(VID_TARGET),x11)
+ifeq ($(VID_TARGET),null)
+CL_OBJS += vid_null.o
+else ifeq ($(VID_TARGET),x11)
 CL_CPPFLAGS += -DX11
 CL_OBJS += x11_core.o
 SW_OBJS += vid_x.o
@@ -864,15 +898,13 @@ ifneq ($(X11BASE),)
 CL_CPPFLAGS += -idirafter $(X11BASE)/include
 CL_LFLAGS += $(call libdir-check,$(X11BASE)/lib)
 endif
-endif
-ifeq ($(VID_TARGET),win)
+else ifeq ($(VID_TARGET),win)
 CL_CPPFLAGS += -idirafter $(DX_INC)
 SW_OBJS += vid_win.o
 GL_OBJS += vid_wgl.o
 CL_LIBS += gdi32
 GL_LIBS += comctl32
-endif
-ifeq ($(VID_TARGET),sdl)
+else ifeq ($(VID_TARGET),sdl)
 SW_OBJS += vid_sdl.o sdl_common.o
 GL_OBJS += vid_sgl.o sdl_common.o
 CL_CPPFLAGS += $(SDL_CFLAGS)
@@ -885,17 +917,17 @@ endif
 # TODO: is it worth allowing input and video to be specified separately?
 #       they can be pretty tightly bound...
 
-ifeq ($(IN_TARGET),x11)
+ifeq ($(IN_TARGET),null)
+CL_OBJS += in_null.o
+else ifeq ($(IN_TARGET),x11)
 CL_OBJS += x11_core.o in_x11.o
 CL_LIBS += X11
 ifneq ($(X11BASE),)
 CL_LFLAGS += $(call libdir-check,$(X11BASE)/lib)
 endif
-endif
-ifeq ($(IN_TARGET),win)
+else ifeq ($(IN_TARGET),win)
 CL_OBJS += in_win.o
-endif
-ifeq ($(IN_TARGET),sdl)
+else ifeq ($(IN_TARGET),sdl)
 CL_OBJS += in_sdl.o sdl_common.o
 endif
 
@@ -905,14 +937,11 @@ endif
 
 ifeq ($(CD_TARGET),null)
 CL_OBJS += cd_null.o
-endif
-ifeq ($(CD_TARGET),linux)
+else ifeq ($(CD_TARGET),linux)
 CL_OBJS += cd_linux.o
-endif
-ifeq ($(CD_TARGET),bsd)
+else ifeq ($(CD_TARGET),bsd)
 CL_OBJS += cd_bsd.o
-endif
-ifeq ($(CD_TARGET),win)
+else ifeq ($(CD_TARGET),win)
 CL_OBJS += cd_win.o
 endif
 
@@ -922,20 +951,16 @@ endif
 
 ifeq ($(SND_TARGET),null)
 CL_OBJS += snd_null.o
-endif
-ifeq ($(SND_TARGET),win)
+else ifeq ($(SND_TARGET),win)
 CL_CPPFLAGS += -idirafter $(DX_INC)
 CL_OBJS += snd_win.o
 # FIXME - direct sound libs?
-endif
-ifeq ($(SND_TARGET),oss)
+else ifeq ($(SND_TARGET),oss)
 CL_OBJS += snd_oss.o
-endif
-ifeq ($(SND_TARGET),sndio)
+else ifeq ($(SND_TARGET),sndio)
 CL_OBJS += snd_sndio.o
 CL_LIBS += sndio
-endif
-ifeq ($(SND_TARGET),sdl)
+else ifeq ($(SND_TARGET),sdl)
 CL_OBJS += snd_sdl.o sdl_common.o
 CL_CPPFLAGS += $(SDL_CFLAGS)
 CL_LFLAGS += $(SDL_LFLAGS)
@@ -988,6 +1013,7 @@ ALL_QWSV_LFLAGS += $(patsubst %,-l%,$(ALL_QWSV_LIBS))
 $(BIN_DIR)/tyr-quake$(EXT):	$(patsubst %,$(NQSWDIR)/%,$(ALL_NQSW_OBJS))
 	$(call do_cc_link,$(ALL_NQSW_LFLAGS))
 	$(call do_strip,$@)
+	$(call do_stack,$@)
 
 $(BIN_DIR)/tyr-glquake$(EXT):	$(patsubst %,$(NQGLDIR)/%,$(ALL_NQGL_OBJS))
 	$(call do_cc_link,$(ALL_NQGL_LFLAGS))
@@ -996,6 +1022,7 @@ $(BIN_DIR)/tyr-glquake$(EXT):	$(patsubst %,$(NQGLDIR)/%,$(ALL_NQGL_OBJS))
 $(BIN_DIR)/tyr-qwcl$(EXT):	$(patsubst %,$(QWSWDIR)/%,$(ALL_QWSW_OBJS))
 	$(call do_cc_link,$(ALL_QWSW_LFLAGS))
 	$(call do_strip,$@)
+	$(call do_stack,$@)
 
 $(BIN_DIR)/tyr-glqwcl$(EXT):	$(patsubst %,$(QWGLDIR)/%,$(ALL_QWGL_OBJS))
 	$(call do_cc_link,$(ALL_QWGL_LFLAGS))
@@ -1004,6 +1031,7 @@ $(BIN_DIR)/tyr-glqwcl$(EXT):	$(patsubst %,$(QWGLDIR)/%,$(ALL_QWGL_OBJS))
 $(BIN_DIR)/tyr-qwsv$(EXT):	$(patsubst %,$(QWSVDIR)/%,$(ALL_QWSV_OBJS))
 	$(call do_cc_link,$(ALL_QWSV_LFLAGS))
 	$(call do_strip,$@)
+	$(call do_stack,$@)
 
 # Build man pages, text and html docs from source
 $(DOC_DIR)/%.6:		man/%.6	$(BUILD_VER)	; $(do_man2man)

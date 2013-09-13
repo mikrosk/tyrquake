@@ -23,6 +23,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include <stdio.h>
 
+#ifdef __MINT__
+// mintlib uses these
+#undef K_CAPSLOCK
+#undef K_CTRL
+#undef K_ALT
+#undef K_RSHIFT
+#undef K_LSHIFT
+#endif
+
+
 #include "qtypes.h"
 
 /*

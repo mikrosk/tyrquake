@@ -19,11 +19,15 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // in_null.c -- for systems without a mouse
 
+#include "client.h"
 #include "quakedef.h"
+
+cvar_t _windowed_mouse = { "_windowed_mouse", "1", true };
 
 void
 IN_Init(void)
 {
+    Cvar_RegisterVariable(&_windowed_mouse);
 }
 
 void

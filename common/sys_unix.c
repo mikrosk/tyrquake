@@ -33,7 +33,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef SERVERONLY
 #include <signal.h>
 #include <sys/ipc.h>
+#ifndef __MINT__
 #include <sys/mman.h>
+#endif
 #endif
 
 #include "common.h"
