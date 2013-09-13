@@ -90,7 +90,7 @@ USE_XF86DGA ?= N
 SNAPSHOT_TARGET = $(DIST_DIR)/tyrquake-$(TYR_VERSION_NUM)-osx.dmg
 else ifeq ($(TARGET_UNIX),mint)
 VID_TARGET ?= atari
-IN_TARGET ?= null
+IN_TARGET ?= atari
 SND_TARGET ?= null
 CD_TARGET ?= null
 USE_XF86DGA ?= N
@@ -932,6 +932,8 @@ else ifeq ($(IN_TARGET),win)
 CL_OBJS += in_win.o
 else ifeq ($(IN_TARGET),sdl)
 CL_OBJS += in_sdl.o sdl_common.o
+else ifeq ($(IN_TARGET),atari)
+CL_OBJS += in_atari.o keys_atari_asm.o
 endif
 
 # ----------------

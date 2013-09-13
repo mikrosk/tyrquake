@@ -263,14 +263,3 @@ VID_SetMode(const qvidmode_t *mode, const byte *palette)
 {
     return true;
 }
-
-// it's in sys_null.c, too but we don't use it
-void
-IN_ProcessEvents(void)
-{
-}
-void
-Sys_SendKeyEvents(void)
-{
-    IN_ProcessEvents();
-}
