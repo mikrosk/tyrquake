@@ -1211,8 +1211,13 @@ Memory_GetSize(void)
     if (parm && com_argc > parm + 1)
 	return (size_t)atoi(com_argv[parm + 1]) << 10;
 
+#ifndef __MINT__
     /* Default memory is now 128MB */
     return (size_t)128 << 20;
+#else
+    /* Default memory for Atari is now 32MB */
+    return (size_t)32 << 20;
+#endif
 }
 
 /*
