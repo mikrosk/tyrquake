@@ -39,7 +39,7 @@ D_Patch
 void
 D_Patch(void)
 {
-#if defined(USE_X86_ASM) || defined(USE_M68K_ASM)
+#if defined(USE_X86_ASM)
     static qboolean protectset8 = false;
     if (!protectset8) {
 	Sys_MakeCodeWriteable(D_PolysetAff8Start, D_PolysetAff8End);

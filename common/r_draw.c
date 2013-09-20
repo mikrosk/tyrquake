@@ -37,7 +37,7 @@ clipplane_t view_clipplanes[4];
 medge_t *r_pedge;
 
 qboolean r_leftclipped, r_rightclipped;
-static qboolean makeleftedge, makerightedge;
+qboolean makeleftedge, makerightedge;
 qboolean r_nearzionly;
 
 int sintable[TURB_TABLE_SIZE];

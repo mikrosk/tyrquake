@@ -32,7 +32,7 @@ short *snd_out;
 
 void Snd_WriteLinearBlastStereo16(void);
 
-#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
+#if !defined(USE_X86_ASM)
 void
 Snd_WriteLinearBlastStereo16(void)
 {
@@ -94,6 +94,7 @@ S_TransferStereo16(int endtime)
     SNDDMA_UnlockBuffer();
 }
 
+#if !defined(USE_M68K_ASM)
 void
 S_TransferPaintBuffer(int endtime)
 {
@@ -152,6 +153,7 @@ S_TransferPaintBuffer(int endtime)
     }
     SNDDMA_UnlockBuffer();
 }
+#endif
 
 
 /*
@@ -241,7 +243,7 @@ SND_InitScaletable(void)
 }
 
 
-#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
+#if !defined(USE_X86_ASM)
 
 void
 SND_PaintChannelFrom8(channel_t *ch, sfxcache_t *sc, int count)

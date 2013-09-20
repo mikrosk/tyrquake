@@ -278,7 +278,7 @@ Sys_DebugLog(const char *file, const char *fmt, ...)
     close(fd);
 }
 
-#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
+#if !defined(USE_X86_ASM)
 void Sys_HighFPPrecision(void) {}
 void Sys_LowFPPrecision(void) {}
 void Sys_SetFPCW(void) {}

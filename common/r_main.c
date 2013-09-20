@@ -264,7 +264,7 @@ R_Init(void)
     R_InitParticles();
 
 // TODO: collect 386-specific code in one place
-#if defined(USE_X86_ASM) || defined(USE_M68K_ASM)
+#if defined(USE_X86_ASM)
     Sys_MakeCodeWriteable(R_EdgeCodeStart, R_EdgeCodeEnd);
 #endif
 
@@ -500,7 +500,7 @@ R_ViewChanged(vrect_t *pvrect, int lineadj, float aspect)
     r_resfudge = r_aliastransadj.value * res_scale;
 
 // TODO: collect 386-specific code in one place
-#if defined(USE_X86_ASM) || defined(USE_M68K_ASM)
+#if defined(USE_X86_ASM)
     if (r_pixbytes == 1) {
 	Sys_MakeCodeWriteable(R_Surf8Start, R_Surf8End);
 	colormap = vid.colormap;

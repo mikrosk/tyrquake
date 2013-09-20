@@ -56,8 +56,8 @@ byte *d_pcolormap;
 
 int d_xdenom;
 
-static edgetable *pedgetable;
-static edgetable edgetables[12] = {
+edgetable *pedgetable;
+edgetable edgetables[12] = {
     {0, 1, r_p0, r_p2, NULL, 2, r_p0, r_p1, r_p2},
     {0, 2, r_p1, r_p0, r_p2, 1, r_p1, r_p2, NULL},
     {1, 1, r_p0, r_p2, NULL, 1, r_p1, r_p2, NULL},
@@ -110,7 +110,7 @@ void D_PolysetScanLeftEdge(int height);
 
 #if !defined(USE_M68K_ASM)
 void D_RasterizeAliasPolySmooth(void);
-#elif !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
+#elif !defined(USE_X86_ASM)
 
 static void D_DrawSubdiv(void);
 static void D_DrawNonSubdiv(void);
@@ -173,7 +173,7 @@ D_PolysetDrawFinalVerts(finalvert_t *fv, int numverts)
 D_DrawSubdiv
 ================
 */
-static void
+void
 D_DrawSubdiv(void)
 {
     mtriangle_t *ptri;
@@ -224,6 +224,10 @@ D_DrawSubdiv(void)
     }
 }
 
+#endif
+
+
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 /*
 ================

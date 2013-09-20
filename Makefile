@@ -91,7 +91,7 @@ SNAPSHOT_TARGET = $(DIST_DIR)/tyrquake-$(TYR_VERSION_NUM)-osx.dmg
 else ifeq ($(TARGET_UNIX),mint)
 VID_TARGET ?= atari
 IN_TARGET ?= atari
-SND_TARGET ?= null
+SND_TARGET ?= atari
 CD_TARGET ?= null
 USE_XF86DGA ?= N
 USE_X86_ASM ?= N
@@ -835,7 +835,7 @@ COMMON_CPPFLAGS += -DUSE_M68K_ASM
 SW_OBJS += common68k.o  d_edge68k.o  d_part68k.o  d_polyset68k.o  d_scan68k.o \
 	   d_sky68k.o  d_sprite68k.o  mathlib68k.o  r_aclip68k.o  r_alias68k.o \
 	   r_bsp68k.o  r_draw68k.o  r_edge68k.o  r_light68k.o  r_misc68k.o \
-	   r_sky68k.o  r_surf68k.o
+	   r_sky68k.o  r_surf68k.o nonintel.o
 else
 SW_OBJS += nonintel.o
 endif
@@ -989,6 +989,8 @@ else ifeq ($(SND_TARGET),sdl)
 CL_OBJS += snd_sdl.o sdl_common.o
 CL_CPPFLAGS += $(SDL_CFLAGS)
 CL_LFLAGS += $(SDL_LFLAGS)
+else ifeq ($(SND_TARGET),atari)
+CL_OBJS += snd_atari.o snd_atari_asm.o
 endif
 
 # ----------------------------------------------------------------------------

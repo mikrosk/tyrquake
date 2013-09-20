@@ -501,6 +501,10 @@ R_DrawSurfaceBlock8_mip3(void)
     }
 }
 
+#endif
+
+
+#if !defined(USE_X86_ASM)
 
 /*
 ================

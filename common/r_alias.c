@@ -43,7 +43,7 @@ void *acolormap;		// FIXME: should go away
 vec3_t r_plightvec;
 int r_ambientlight;
 float r_shadelight;
-static float ziscale;
+float ziscale;
 static model_t *pmodel;
 
 static vec3_t alias_forward, alias_right, alias_up;
@@ -552,7 +552,7 @@ R_AliasTransformFinalVert(finalvert_t *fv, auxvert_t *av,
     fv->v[4] = temp;
 }
 
-#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
+#if !defined(USE_X86_ASM)
 
 /*
 ================
@@ -897,7 +897,7 @@ R_AliasDrawModel(entity_t *e, alight_t *plighting)
     if (r_affinetridesc.drawtype) {
 	D_PolysetUpdateTables();	// FIXME: precalc...
     } else {
-#if defined(USE_X86_ASM) || defined(USE_M68K_ASM)
+#if defined(USE_X86_ASM)
 	D_Aff8Patch(e->colormap);
 #endif
     }

@@ -1940,7 +1940,7 @@ Mod_CreateBoxhull(const vec3_t mins, const vec3_t maxs, boxhull_t *boxhull)
 Mod_HullPointContents
 ==================
 */
-#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
+#if !defined(USE_X86_ASM)
 int
 Mod_HullPointContents(const hull_t *hull, int nodenum, const vec3_t point)
 {

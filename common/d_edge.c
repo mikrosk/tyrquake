@@ -28,14 +28,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "client.h"
 #endif
 
-#if !defined(USE_M68K_ASM)
-
-static int miplevel;
-static vec3_t transformed_modelorg;
+int miplevel;
+vec3_t transformed_modelorg;
 
 float scale_for_mip;
 int screenwidth;
 int ubasestep, errorterm, erroradjustup, erroradjustdown;
+
+#if !defined(USE_M68K_ASM)
 
 /*
 =============
@@ -62,6 +62,8 @@ D_MipLevelForScale(float scale)
     return lmiplevel;
 }
 
+#endif
+
 
 /*
 ==============
@@ -71,7 +73,7 @@ D_DrawSolidSurface
 
 // FIXME: clean this up
 
-static void
+void
 D_DrawSolidSurface(surf_t *surf, int color)
 {
     espan_t *span;
@@ -102,6 +104,8 @@ D_DrawSolidSurface(surf_t *surf, int color)
     }
 }
 
+
+#if !defined(USE_M68K_ASM)
 
 /*
 ==============
