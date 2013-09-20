@@ -106,10 +106,11 @@ static byte *skinstart;
 void D_PolysetDrawSpans8(spanpackage_t *pspanpackage);
 void D_PolysetCalcGradients(int skinwidth);
 void D_PolysetSetEdgeTable(void);
-void D_RasterizeAliasPolySmooth(void);
 void D_PolysetScanLeftEdge(int height);
 
-#ifndef USE_X86_ASM
+#if !defined(USE_M68K_ASM)
+void D_RasterizeAliasPolySmooth(void);
+#elif !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 static void D_DrawSubdiv(void);
 static void D_DrawNonSubdiv(void);
@@ -396,7 +397,7 @@ D_PolysetUpdateTables(void)
 }
 
 
-#ifndef USE_X86_ASM
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 /*
 ===================
@@ -498,7 +499,7 @@ D_PolysetSetUpForLineScan(fixed8_t startvertu, fixed8_t startvertv,
 }
 
 
-#ifndef USE_X86_ASM
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 /*
 ================
@@ -620,6 +621,7 @@ D_PolysetDrawSpans8(spanpackage_t *pspanpackage)
 }
 #endif /* USE_X86_ASM */
 
+#if !defined(USE_M68K_ASM)
 
 /*
 ================
@@ -665,7 +667,7 @@ D_RasterizeAliasPolySmooth(void)
 
     d_ptex = (byte *)r_affinetridesc.pskin + (plefttop[2] >> 16) +
 	(plefttop[3] >> 16) * r_affinetridesc.skinwidth;
-#ifdef USE_X86_ASM
+#if defined(USE_X86_ASM)
     d_sfrac = (plefttop[2] & 0xFFFF) << 16;
     d_tfrac = (plefttop[3] & 0xFFFF) << 16;
     d_pzbasestep = (d_zwidth + ubasestep) << 1;
@@ -699,7 +701,7 @@ D_RasterizeAliasPolySmooth(void)
     d_countextrastep = ubasestep + 1;
     d_ptexbasestep = ((r_sstepy + r_sstepx * ubasestep) >> 16) +
 	((r_tstepy + r_tstepx * ubasestep) >> 16) * r_affinetridesc.skinwidth;
-#ifdef USE_X86_ASM
+#if defined(USE_X86_ASM)
     d_sfracbasestep = (r_sstepy + r_sstepx * ubasestep) << 16;
     d_tfracbasestep = (r_tstepy + r_tstepx * ubasestep) << 16;
 #else
@@ -712,7 +714,7 @@ D_RasterizeAliasPolySmooth(void)
     d_ptexextrastep = ((r_sstepy + r_sstepx * d_countextrastep) >> 16) +
 	((r_tstepy + r_tstepx * d_countextrastep) >> 16) *
 	r_affinetridesc.skinwidth;
-#ifdef USE_X86_ASM
+#if defined(USE_X86_ASM)
     d_sfracextrastep = (r_sstepy + r_sstepx * d_countextrastep) << 16;
     d_tfracextrastep = (r_tstepy + r_tstepx * d_countextrastep) << 16;
 #else
@@ -752,7 +754,7 @@ D_RasterizeAliasPolySmooth(void)
 	d_pdestbasestep = screenwidth + ubasestep;
 	d_pdestextrastep = d_pdestbasestep + 1;
 	d_pdest = (byte *)d_viewbuffer + ystart * screenwidth + plefttop[0];
-#ifdef USE_X86_ASM
+#if defined(USE_X86_ASM)
 	d_pzbasestep = (d_zwidth + ubasestep) << 1;
 	d_pzextrastep = d_pzbasestep + 2;
 #else
@@ -770,7 +772,7 @@ D_RasterizeAliasPolySmooth(void)
 	d_ptexbasestep = ((r_sstepy + r_sstepx * ubasestep) >> 16) +
 	    ((r_tstepy + r_tstepx * ubasestep) >> 16) *
 	    r_affinetridesc.skinwidth;
-#ifdef USE_X86_ASM
+#if defined(USE_X86_ASM)
 	d_sfracbasestep = (r_sstepy + r_sstepx * ubasestep) << 16;
 	d_tfracbasestep = (r_tstepy + r_tstepx * ubasestep) << 16;
 #else
@@ -783,7 +785,7 @@ D_RasterizeAliasPolySmooth(void)
 	d_ptexextrastep = ((r_sstepy + r_sstepx * d_countextrastep) >> 16) +
 	    ((r_tstepy + r_tstepx * d_countextrastep) >> 16) *
 	    r_affinetridesc.skinwidth;
-#ifdef USE_X86_ASM
+#if defined(USE_X86_ASM)
 	d_sfracextrastep =
 	    ((r_sstepy + r_sstepx * d_countextrastep) & 0xFFFF) << 16;
 	d_tfracextrastep =
@@ -833,6 +835,8 @@ D_RasterizeAliasPolySmooth(void)
 	D_PolysetDrawSpans8(pstart);
     }
 }
+
+#endif
 
 
 /*

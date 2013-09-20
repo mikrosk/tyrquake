@@ -331,6 +331,7 @@ int (*LittleLong) (int l);
 float (*BigFloat) (float l);
 float (*LittleFloat) (float l);
 
+#if !defined(USE_M68K_ASM)
 short
 ShortSwap(short l)
 {
@@ -341,6 +342,9 @@ ShortSwap(short l)
 
     return (b1 << 8) + b2;
 }
+#else
+short ShortSwap(short l);
+#endif
 
 short
 ShortNoSwap(short l)
@@ -348,6 +352,7 @@ ShortNoSwap(short l)
     return l;
 }
 
+#if !defined(USE_M68K_ASM)
 int
 LongSwap(int l)
 {
@@ -360,6 +365,9 @@ LongSwap(int l)
 
     return ((int)b1 << 24) + ((int)b2 << 16) + ((int)b3 << 8) + b4;
 }
+#else
+int LongSwap(int l);
+#endif
 
 int
 LongNoSwap(int l)
@@ -367,6 +375,7 @@ LongNoSwap(int l)
     return l;
 }
 
+#if !defined(USE_M68K_ASM)
 float
 FloatSwap(float f)
 {
@@ -382,6 +391,9 @@ FloatSwap(float f)
     dat2.b[3] = dat1.b[0];
     return dat2.f;
 }
+#else
+float FloatSwap(float f);
+#endif
 
 float
 FloatNoSwap(float f)

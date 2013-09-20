@@ -30,7 +30,7 @@ static int sprite_height;
 static int minindex, maxindex;
 static sspan_t *sprite_spans;
 
-#ifndef USE_X86_ASM
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 /*
 =====================

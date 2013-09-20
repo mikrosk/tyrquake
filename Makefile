@@ -831,7 +831,7 @@ SW_OBJS   += d_draw.o d_draw16.o d_parta.o d_polysa.o d_scana.o d_spr8.o \
 	     d_varsa.o r_aclipa.o r_aliasa.o r_drawa.o r_edgea.o r_varsa.o \
 	     surf8.o surf16.o
 else ifeq ($(USE_M68K_ASM),Y)
-COMMON_CPPFLAGS += -DUSE_M68k_ASM
+COMMON_CPPFLAGS += -DUSE_M68K_ASM
 SW_OBJS += common68k.o  d_edge68k.o  d_part68k.o  d_polyset68k.o  d_scan68k.o \
 	   d_sky68k.o  d_sprite68k.o  mathlib68k.o  r_aclip68k.o  r_alias68k.o \
 	   r_bsp68k.o  r_draw68k.o  r_edge68k.o  r_light68k.o  r_misc68k.o \

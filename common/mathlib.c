@@ -153,6 +153,8 @@ RotatePointAroundVector(vec3_t dst, const vec3_t dir, const vec3_t point,
 
 /*-----------------------------------------------------------------*/
 
+#if !defined(USE_M68K_ASM)
+
 float
 anglemod(float a)
 {
@@ -165,6 +167,8 @@ anglemod(float a)
     a = (360.0 / 65536) * ((int)(a * (65536 / 360.0)) & 65535);
     return a;
 }
+
+#endif
 
 int
 SignbitsForPlane(const mplane_t *plane)
@@ -193,7 +197,7 @@ BOPS_Error(void)
     Sys_Error("%s:  Bad signbits", __func__);
 }
 
-#ifndef USE_X86_ASM
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 /*
 ==================
@@ -306,6 +310,8 @@ BoxOnPlaneSide(const vec3_t mins, const vec3_t maxs, const mplane_t *p)
 }
 #endif /* USE_X86_ASM */
 
+
+#if !defined(USE_M68K_ASM)
 
 void
 AngleVectors(const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
@@ -454,6 +460,8 @@ Q_log2(int val)
     return answer;
 }
 
+#endif
+
 int
 Q_gcd(int a, int b)
 {
@@ -474,6 +482,8 @@ Q_gcd(int a, int b)
 
     return b;
 }
+
+#if !defined(USE_M68K_ASM)
 
 /*
 ================
@@ -606,8 +616,10 @@ GreatestCommonDivisor(int i1, int i2)
     }
 }
 
+#endif
 
-#ifndef USE_X86_ASM
+
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 // TODO: move to nonintel.c
 

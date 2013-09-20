@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 // r_vars.c: global refresh variables
 
-#ifndef USE_X86_ASM
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 #include "mathlib.h"
 #include "quakedef.h"

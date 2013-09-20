@@ -552,7 +552,7 @@ R_AliasTransformFinalVert(finalvert_t *fv, auxvert_t *av,
     fv->v[4] = temp;
 }
 
-#ifndef USE_X86_ASM
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 /*
 ================
@@ -608,6 +608,8 @@ R_AliasTransformAndProjectFinalVerts(finalvert_t *fv, stvert_t *pstverts)
 #endif
 
 
+#if !defined(USE_M68K_ASM)
+
 /*
 ================
 R_AliasProjectFinalVert
@@ -626,6 +628,8 @@ R_AliasProjectFinalVert(finalvert_t *fv, auxvert_t *av)
     fv->v[0] = (av->fv[0] * aliasxscale * zi) + aliasxcenter;
     fv->v[1] = (av->fv[1] * aliasyscale * zi) + aliasycenter;
 }
+
+#endif
 
 
 /*
@@ -893,7 +897,7 @@ R_AliasDrawModel(entity_t *e, alight_t *plighting)
     if (r_affinetridesc.drawtype) {
 	D_PolysetUpdateTables();	// FIXME: precalc...
     } else {
-#ifdef USE_X86_ASM
+#if defined(USE_X86_ASM) || defined(USE_M68K_ASM)
 	D_Aff8Patch(e->colormap);
 #endif
     }

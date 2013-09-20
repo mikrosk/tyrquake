@@ -54,7 +54,7 @@ int r_ceilv1;
 qboolean r_lastvertvalid;
 
 
-#ifndef USE_X86_ASM
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 /*
 ================
@@ -350,6 +350,8 @@ R_EmitCachedEdge(void)
 }
 
 
+#if !defined(USE_M68K_ASM)
+
 /*
 ================
 R_RenderFace
@@ -490,6 +492,8 @@ R_RenderFace(const entity_t *e, msurface_t *fa, int clipflags)
 
     surface_p++;
 }
+
+#endif
 
 
 /*

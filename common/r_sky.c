@@ -82,6 +82,8 @@ R_InitSky(texture_t *mt)
 }
 
 
+#if !defined(USE_M68K_ASM)
+
 /*
 =================
 R_MakeSky
@@ -124,6 +126,8 @@ R_MakeSky(void)
 
     r_skymade = 1;
 }
+
+#endif
 
 
 /*

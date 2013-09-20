@@ -141,7 +141,7 @@ D_SetupFrame(void)
     for (i = 0; i < (NUM_MIPS - 1); i++)
 	d_scalemip[i] = basemip[i] * d_mipscale.value;
 
-#ifdef USE_X86_ASM
+#if defined(USE_X86_ASM) || defined(USE_M68K_ASM)
     if (d_subdiv16.value)
 	D_DrawSpans = D_DrawSpans16;
     else

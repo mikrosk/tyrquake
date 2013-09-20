@@ -122,7 +122,7 @@ void R_SetSkyFrame(void);
 void R_DrawSurfaceBlock16(void);
 void R_DrawSurfaceBlock8(void);
 
-#ifdef USE_X86_ASM
+#if defined(USE_X86_ASM) || defined(USE_M68K_ASM)
 
 void R_DrawSurfaceBlock8_mip0(void);
 void R_DrawSurfaceBlock8_mip1(void);

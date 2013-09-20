@@ -111,7 +111,7 @@ R_BeginEdgeFrame(void)
 }
 
 
-#ifndef USE_X86_ASM
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 /*
 ==============
@@ -158,7 +158,7 @@ R_InsertNewEdges(edge_t *edgestoadd, edge_t *edgelist)
 #endif /* USE_X86_ASM */
 
 
-#ifndef USE_X86_ASM
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 /*
 ==============
@@ -178,7 +178,7 @@ R_RemoveEdges(edge_t *pedge)
 #endif /* USE_X86_ASM */
 
 
-#ifndef USE_X86_ASM
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 /*
 ==============
@@ -394,7 +394,7 @@ R_TrailingEdge(surf_t *surf, edge_t *edge)
 }
 
 
-#ifndef USE_X86_ASM
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 /*
 ==============

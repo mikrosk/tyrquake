@@ -47,7 +47,7 @@ D_StartParticles(void)
 }
 
 
-#ifndef USE_X86_ASM
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 /*
 ==============

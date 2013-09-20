@@ -34,6 +34,8 @@ int r_turb_spancount;
 void D_DrawTurbulent8Span(void);
 
 
+#if !defined(USE_M68K_ASM)
+
 /*
 =============
 D_WarpScreen
@@ -95,8 +97,10 @@ D_WarpScreen(void)
     free(column);
 }
 
+#endif
 
-#ifndef USE_X86_ASM
+
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 /*
 =============
@@ -121,6 +125,8 @@ D_DrawTurbulent8Span(void)
 
 #endif /* USE_X86_ASM */
 
+
+#if !defined(USE_M68K_ASM)
 
 /*
 =============
@@ -251,8 +257,10 @@ Turbulent8(espan_t *pspan)
     } while ((pspan = pspan->pnext) != NULL);
 }
 
+#endif
 
-#ifndef USE_X86_ASM
+
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 /*
 =============
@@ -384,7 +392,7 @@ D_DrawSpans8(espan_t *pspan)
 #endif
 
 
-#ifndef USE_X86_ASM
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 /*
 =============

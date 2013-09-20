@@ -28,6 +28,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "client.h"
 #endif
 
+#if !defined(USE_M68K_ASM)
+
 static int miplevel;
 static vec3_t transformed_modelorg;
 
@@ -294,3 +296,5 @@ D_DrawSurfaces(void)
 	}
     }
 }
+
+#endif

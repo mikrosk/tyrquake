@@ -87,7 +87,7 @@ void (*prealspandrawer) (void);
 surfcache_t *D_CacheSurface(const entity_t *e, msurface_t *surface,
 			    int miplevel);
 
-#ifdef USE_X86_ASM
+#if defined(USE_X86_ASM) || defined(USE_M68K_ASM)
 extern void D_PolysetAff8Start(void);
 extern void D_PolysetAff8End(void);
 #endif

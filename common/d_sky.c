@@ -27,6 +27,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define SKY_SPAN_MAX	(1 << SKY_SPAN_SHIFT)
 
 
+#if !defined(USE_M68K_ASM)
+
 /*
 =================
 D_Sky_uv_To_st
@@ -130,3 +132,5 @@ D_DrawSkyScans8(espan_t *pspan)
 
     } while ((pspan = pspan->pnext) != NULL);
 }
+
+#endif

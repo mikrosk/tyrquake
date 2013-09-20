@@ -40,7 +40,7 @@ unsigned char *r_source, *r_sourcemax;
 static int r_numhblocks;
 int r_numvblocks;
 
-#ifndef USE_X86_ASM
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 void R_DrawSurfaceBlock8_mip0(void);
 void R_DrawSurfaceBlock8_mip1(void);
 void R_DrawSurfaceBlock8_mip2(void);
@@ -308,7 +308,7 @@ R_DrawSurface(void)
 
 //=============================================================================
 
-#ifndef USE_X86_ASM
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 /*
 ================

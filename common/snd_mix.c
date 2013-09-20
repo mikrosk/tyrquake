@@ -32,7 +32,7 @@ short *snd_out;
 
 void Snd_WriteLinearBlastStereo16(void);
 
-#ifndef USE_X86_ASM
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 void
 Snd_WriteLinearBlastStereo16(void)
 {
@@ -241,7 +241,7 @@ SND_InitScaletable(void)
 }
 
 
-#ifndef USE_X86_ASM
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 
 void
 SND_PaintChannelFrom8(channel_t *ch, sfxcache_t *sc, int count)

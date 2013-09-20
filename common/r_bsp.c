@@ -69,6 +69,8 @@ R_EntityRotate(vec3_t vec)
 }
 
 
+#if !defined(USE_M68K_ASM)
+
 /*
 ================
 R_RotateBmodel
@@ -146,6 +148,8 @@ R_RotateBmodel(const entity_t *e)
 
     R_TransformFrustum();
 }
+
+#endif
 
 
 /*

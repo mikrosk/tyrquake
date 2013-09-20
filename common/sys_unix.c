@@ -278,7 +278,7 @@ Sys_DebugLog(const char *file, const char *fmt, ...)
     close(fd);
 }
 
-#ifndef USE_X86_ASM
+#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
 void Sys_HighFPPrecision(void) {}
 void Sys_LowFPPrecision(void) {}
 void Sys_SetFPCW(void) {}
@@ -292,7 +292,7 @@ Sys_MakeCodeWriteable
 void
 Sys_MakeCodeWriteable(void *start_addr, void *end_addr)
 {
-#ifdef USE_X86_ASM
+#if defined(USE_X86_ASM)
     void *addr;
     size_t length;
     intptr_t pagesize;
