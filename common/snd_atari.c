@@ -52,8 +52,10 @@ qboolean SNDDMA_Init(void)
 		return false;
 	}
 	
+#if defined(USE_M68K_ASM)
 	// save sound regs
 	sound_atari_init();
+#endif
 	
 	memset( &atari_shm, 0, sizeof( dma_t ) );
 	
@@ -132,8 +134,10 @@ void SNDDMA_Shutdown(void)
 		Devconnect( 0x0000, DAC, CLK25M, CLK12K, NO_SHAKE );	/* nothing -> DAC */
 		Unlocksnd();
 		
+#if defined(USE_M68K_ASM)
 		// restore sound regs
 		sound_atari_shutdown();
+#endif
 	}
 }
 

@@ -563,6 +563,12 @@ endef
 define QWSV_RULES
 $(1)/%.o:	CPPFLAGS = $(2)
 $(1)/%.o:	CFLAGS += $(3)
+ifneq ($(TARGET_UNIX),mint)
+$(1)/%.o:	common/%.S	; $$(do_cc_o_c)
+else
+$(1)/%.o:	common/m68k/atari/%.s	; $$(do_as_o_s)
+$(1)/%.o:	common/m68k/%.s		; $$(do_as_o_s)
+endif
 $(1)/%.o:	QW/server/%.c	; $$(do_cc_o_c)
 $(1)/%.o:	QW/common/%.c	; $$(do_cc_o_c)
 $(1)/%.o:	common/%.c	; $$(do_cc_o_c)
@@ -832,10 +838,12 @@ SW_OBJS   += d_draw.o d_draw16.o d_parta.o d_polysa.o d_scana.o d_spr8.o \
 	     surf8.o surf16.o
 else ifeq ($(USE_M68K_ASM),Y)
 COMMON_CPPFLAGS += -DUSE_M68K_ASM
-SW_OBJS += common68k.o  d_edge68k.o  d_part68k.o  d_polyset68k.o  d_scan68k.o \
-	   d_sky68k.o  d_sprite68k.o  mathlib68k.o  r_aclip68k.o  r_alias68k.o \
-	   r_bsp68k.o  r_draw68k.o  r_edge68k.o  r_light68k.o  r_misc68k.o \
-	   r_sky68k.o  r_surf68k.o nonintel.o
+COMMON_OBJS += common68k.o mathlib68k.o
+CL_OBJS   += snd_atari_asm.o
+SW_OBJS   += d_edge68k.o  d_part68k.o  d_polyset68k.o  d_scan68k.o \
+	     d_sky68k.o  d_sprite68k.o  r_aclip68k.o  r_alias68k.o \
+	     r_bsp68k.o  r_draw68k.o  r_edge68k.o  r_light68k.o  r_misc68k.o \
+	     r_sky68k.o  r_surf68k.o nonintel.o
 else
 SW_OBJS += nonintel.o
 endif
@@ -990,7 +998,7 @@ CL_OBJS += snd_sdl.o sdl_common.o
 CL_CPPFLAGS += $(SDL_CFLAGS)
 CL_LFLAGS += $(SDL_LFLAGS)
 else ifeq ($(SND_TARGET),atari)
-CL_OBJS += snd_atari.o snd_atari_asm.o
+CL_OBJS += snd_atari.o
 endif
 
 # ----------------------------------------------------------------------------

@@ -110,7 +110,9 @@ void D_PolysetScanLeftEdge(int height);
 
 #if !defined(USE_M68K_ASM)
 void D_RasterizeAliasPolySmooth(void);
-#elif !defined(USE_X86_ASM)
+#endif
+
+#if !defined(USE_X86_ASM)
 
 static void D_DrawSubdiv(void);
 static void D_DrawNonSubdiv(void);
