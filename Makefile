@@ -148,6 +148,7 @@ else ifeq ($(TARGET_OS),UNIX)
 ifeq ($(TARGET_UNIX),mint)
 EXT=.ttp
 TARGET ?= m68k-atari-mint
+AS = vasm
 CC = $(TARGET)-gcc
 STRIP = $(TARGET)-strip -s
 STACK = $(TARGET)-stack --fix=512k
@@ -265,8 +266,9 @@ STRIP   ?= strip
 WINDRES ?= windres
 STACK   ?=
 
-CFLAGS ?=
-CFLAGS := $(CFLAGS) -Wall -Wno-trigraphs -Wwrite-strings
+ASFLAGS ?=
+CFLAGS  ?=
+CFLAGS  := $(CFLAGS) -Wall -Wno-trigraphs -Wwrite-strings
 
 ifeq ($(DEBUG),Y)
 CFLAGS += -g
@@ -282,7 +284,8 @@ CFLAGS += $(call cc-option,-ffast-math,)
 endif
 
 ifeq ($(TARGET_UNIX),mint)
-CFLAGS += -Dfloorf=floor -m68060
+CFLAGS  += -Dfloorf=floor -m68060
+ASFLAGS += -phxass -m68060 -Faout -quiet -DATARI -DM881 -Icommon/m68k
 endif
 
 # --------------------------------------------------------------------------
@@ -369,6 +372,19 @@ define do_cc_o_c
 	@$(cmd_cc_o_c);
 endef
 
+quiet_cmd_as_o_s = '  AS       $@'
+      cmd_as_o_s = $(AS) $(ASFLAGS) -o $@ $<
+
+ifneq ($(TARGET_UNIX),mint)
+do_as_o_s = $(cmd_cc_o_c)
+else
+define do_as_o_s
+	@$(do_mkdir);
+	@echo $($(quiet)cmd_as_o_s);
+	@$(cmd_as_o_s);
+endef
+endif
+
 cmd_cc_dep_m = $(cmd_cc_dep_c)
 
 quiet_cmd_cc_o_m = '  CC       $@'
@@ -407,13 +423,12 @@ endef
 quiet_cmd_strip = '  STRIP    $(1)'
       cmd_strip = $(STRIP) $(1)
 
-quiet_cmd_strip = '  STACK    $(1)'
-      cmd_strip = $(STACK) $(1)
+quiet_cmd_stack = '  STACK    $(1)'
+      cmd_stack = $(STACK) $(1)
 
 ifeq ($(DEBUG),Y)
 do_strip=
-else
-ifeq ($(STRIP),)
+else ifeq ($(STRIP),)
 do_strip=
 else
 define do_strip
@@ -421,19 +436,16 @@ define do_strip
 	@$(call cmd_strip,$(1));
 endef
 endif
-endif
 
-ifeq ($(TARGET_UNIX),mint)
+ifneq ($(TARGET_UNIX),mint)
+do_stack=
+else ifeq ($(STACK),)
 do_stack=
 else
-ifeq ($(STACK),)
-do_stack=
-else
-define do_strip
+define do_stack
 	@echo $(call $(quiet)cmd_stack,$(1));
 	@$(call cmd_stack,$(1));
 endef
-endif
 endif
 
 git_date = $(shell git log -1 --date=short --format="%ad" -- $< 2>/dev/null)
@@ -521,8 +533,13 @@ endif
 define NQCL_RULES
 $(1)/%.o:	CPPFLAGS = $(2)
 $(1)/%.o:	CFLAGS += $(3)
+ifneq ($(TARGET_UNIX),mint)
 $(1)/%.o:	common/%.S	; $$(do_cc_o_c)
 $(1)/%.o:	NQ/%.S		; $$(do_cc_o_c)
+else
+$(1)/%.o:	common/m68k/atari/%.s	; $$(do_as_o_s)
+$(1)/%.o:	common/m68k/%.s		; $$(do_as_o_s)
+endif
 $(1)/%.o:	common/%.c	; $$(do_cc_o_c)
 $(1)/%.o:	NQ/%.c		; $$(do_cc_o_c)
 $(1)/%.res:	common/%.rc	; $$(do_windres_res_rc)
@@ -531,9 +548,12 @@ endef
 define QWCL_RULES
 $(1)/%.o:	CPPFLAGS = $(2)
 $(1)/%.o:	CFLAGS += $(3)
+ifneq ($(TARGET_UNIX),mint)
 $(1)/%.o:	common/%.S	; $$(do_cc_o_c)
-$(1)/%.o:	QW/client/%.S	; $$(do_cc_o_c)
-$(1)/%.o:	QW/common/%.S	; $$(do_cc_o_c)
+else
+$(1)/%.o:	common/m68k/atari/%.s	; $$(do_as_o_s)
+$(1)/%.o:	common/m68k/%.s		; $$(do_as_o_s)
+endif
 $(1)/%.o:	common/%.c	; $$(do_cc_o_c)
 $(1)/%.o:	QW/client/%.c	; $$(do_cc_o_c)
 $(1)/%.o:	QW/common/%.c	; $$(do_cc_o_c)
@@ -543,9 +563,6 @@ endef
 define QWSV_RULES
 $(1)/%.o:	CPPFLAGS = $(2)
 $(1)/%.o:	CFLAGS += $(3)
-$(1)/%.o:	QW/server/%.S	; $$(do_cc_o_c)
-$(1)/%.o:	QW/common/%.S	; $$(do_cc_o_c)
-$(1)/%.o:	common/%.S	; $$(do_cc_o_c)
 $(1)/%.o:	QW/server/%.c	; $$(do_cc_o_c)
 $(1)/%.o:	QW/common/%.c	; $$(do_cc_o_c)
 $(1)/%.o:	common/%.c	; $$(do_cc_o_c)
@@ -815,7 +832,10 @@ SW_OBJS   += d_draw.o d_draw16.o d_parta.o d_polysa.o d_scana.o d_spr8.o \
 	     surf8.o surf16.o
 else ifeq ($(USE_M68K_ASM),Y)
 COMMON_CPPFLAGS += -DUSE_M68k_ASM
-SW_OBJS += nonintel.o	# TODO: remove
+SW_OBJS += common68k.o  d_edge68k.o  d_part68k.o  d_polyset68k.o  d_scan68k.o \
+	   d_sky68k.o  d_sprite68k.o  mathlib68k.o  r_aclip68k.o  r_alias68k.o \
+	   r_bsp68k.o  r_draw68k.o  r_edge68k.o  r_light68k.o  r_misc68k.o \
+	   r_sky68k.o  r_surf68k.o
 else
 SW_OBJS += nonintel.o
 endif
