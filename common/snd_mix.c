@@ -31,6 +31,7 @@ int *snd_p, snd_linear_count, snd_vol;
 short *snd_out;
 
 void Snd_WriteLinearBlastStereo16(void);
+void S_TransferPaintBuffer(int endtime);
 
 #if !defined(USE_X86_ASM)
 void

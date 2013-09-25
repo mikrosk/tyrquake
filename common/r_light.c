@@ -137,6 +137,8 @@ R_PushDlights(void)
 /* Light Sampling                                                            */
 /* --------------------------------------------------------------------------*/
 
+#if !defined(USE_M68K_ASM)
+
 #ifdef GLQUAKE
 vec3_t lightspot;
 #endif
@@ -190,6 +192,7 @@ R_LightSurfPoint(const mnode_t *node, const vec3_t surfpoint)
 
     return -1;
 }
+
 
 static int
 RecursiveLightPoint(const mnode_t *node, const vec3_t start, const vec3_t end)
@@ -249,6 +252,12 @@ RecursiveLightPoint(const mnode_t *node, const vec3_t start, const vec3_t end)
     /* Go down back side */
     return RecursiveLightPoint(node->children[!side], surfpoint, end);
 }
+
+#else
+
+int RecursiveLightPoint(const mnode_t *node, const vec3_t start, const vec3_t end);
+
+#endif
 
 /*
  * FIXME - check what the callers do, but I don't think this will check the

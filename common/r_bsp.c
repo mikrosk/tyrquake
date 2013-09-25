@@ -52,6 +52,8 @@ static qboolean makeclippededge;
 
 //===========================================================================
 
+#if !defined(USE_M68K_ASM)
+
 /*
 ================
 R_EntityRotate
@@ -68,8 +70,6 @@ R_EntityRotate(vec3_t vec)
     vec[2] = DotProduct(entity_rotation[2], tvec);
 }
 
-
-#if !defined(USE_M68K_ASM)
 
 /*
 ================
@@ -385,6 +385,8 @@ R_DrawSubmodelPolygons(const entity_t *entity, int clipflags)
     }
 }
 
+#if !defined(USE_M68K_ASM)
+
 /*
 ================
 R_RecursiveWorldNode
@@ -458,6 +460,12 @@ R_RecursiveWorldNode(const entity_t *e, mnode_t *node)
     /* recurse down the back side */
     R_RecursiveWorldNode(e, node->children[!side]);
 }
+
+#else
+
+void R_RecursiveWorldNode(const entity_t *e, mnode_t *node);
+
+#endif
 
 
 

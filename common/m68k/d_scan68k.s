@@ -2064,4 +2064,3 @@ ReciprocTable
 		dc.w    16384/13
 		dc.w    16384/14
 		dc.w    16384/15
-_SysBase        dc.l    0

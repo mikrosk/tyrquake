@@ -82,9 +82,15 @@ float r_avertexnormals[NUMVERTEXNORMALS][3] = {
 
 static void R_AliasSetUpTransform(const entity_t *e, aliashdr_t *pahdr,
 				  int trivial_accept);
+#if !defined(USE_M68K_ASM)
 static void R_AliasTransformVector(const vec3_t in, vec3_t out);
 static void R_AliasTransformFinalVert(finalvert_t *fv, auxvert_t *av,
 				      trivertx_t *pverts, stvert_t *pstverts);
+#else
+void R_AliasTransformVector(const vec3_t in, vec3_t out);
+void R_AliasTransformFinalVert(finalvert_t *fv, auxvert_t *av,
+                               trivertx_t *pverts, stvert_t *pstverts);
+#endif
 
 void R_AliasTransformAndProjectFinalVerts(finalvert_t *fv, stvert_t *pstverts);
 void R_AliasProjectFinalVert(finalvert_t *fv, auxvert_t *av);
@@ -331,6 +337,8 @@ R_AliasCheckBBox(entity_t *e)
 }
 
 
+#if !defined(USE_M68K_ASM)
+
 /*
 ================
 R_AliasTransformVector
@@ -343,6 +351,8 @@ R_AliasTransformVector(const vec3_t in, vec3_t out)
     out[1] = DotProduct(in, aliastransform[1]) + aliastransform[1][3];
     out[2] = DotProduct(in, aliastransform[2]) + aliastransform[2][3];
 }
+
+#endif
 
 
 /*
@@ -511,6 +521,8 @@ R_AliasSetUpTransform(const entity_t *e, aliashdr_t *pahdr, int trivial_accept)
 }
 
 
+#if !defined(USE_M68K_ASM)
+
 /*
 ================
 R_AliasTransformFinalVert
@@ -551,6 +563,8 @@ R_AliasTransformFinalVert(finalvert_t *fv, auxvert_t *av,
 
     fv->v[4] = temp;
 }
+
+#endif
 
 #if !defined(USE_X86_ASM)
 

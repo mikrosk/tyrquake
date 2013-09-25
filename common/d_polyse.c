@@ -107,16 +107,18 @@ void D_PolysetDrawSpans8(spanpackage_t *pspanpackage);
 void D_PolysetCalcGradients(int skinwidth);
 void D_PolysetSetEdgeTable(void);
 void D_PolysetScanLeftEdge(int height);
-
-#if !defined(USE_M68K_ASM)
 void D_RasterizeAliasPolySmooth(void);
-#endif
 
 #if !defined(USE_X86_ASM)
 
 static void D_DrawSubdiv(void);
+#if !defined(USE_M68K_ASM)
 static void D_DrawNonSubdiv(void);
 static void D_PolysetRecursiveTriangle(int *p1, int *p2, int *p3);
+#else
+void D_DrawNonSubdiv(void);
+void D_PolysetRecursiveTriangle(int *p1, int *p2, int *p3);
+#endif
 
 /*
 ================
@@ -469,6 +471,8 @@ D_PolysetScanLeftEdge(int height)
 #endif /* USE_X86_ASM */
 
 
+#if !defined(USE_M68K_ASM)
+
 /*
 ===================
 D_PolysetSetUpForLineScan
@@ -503,6 +507,8 @@ D_PolysetSetUpForLineScan(fixed8_t startvertu, fixed8_t startvertv,
 	erroradjustdown = dn;
     }
 }
+
+#endif
 
 
 #if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)

@@ -165,6 +165,8 @@ R_Alias_clip_bottom(finalvert_t *pfv0, finalvert_t *pfv1, finalvert_t *out)
 #endif
 
 
+#if !defined(USE_M68K_ASM)
+
 static int
 R_AliasClip(finalvert_t *in, finalvert_t *out, int flag, int count,
 	    void (*clip) (finalvert_t *pfv0, finalvert_t *pfv1,
@@ -202,6 +204,14 @@ R_AliasClip(finalvert_t *in, finalvert_t *out, int flag, int count,
 
     return k;
 }
+
+#else
+
+int R_AliasClip(finalvert_t *in, finalvert_t *out, int flag, int count,
+	        void (*clip) (finalvert_t *pfv0, finalvert_t *pfv1,
+	                      finalvert_t *out));
+
+#endif
 
 
 /*

@@ -47,13 +47,13 @@ _R_MakeSky
 		fmove.s _skytime,fp0            ;xshift = skytime*skyspeed
 		fmul.s  _skyspeed,fp0
 		fmove.l fp0,d0
-		cmp.l   _xlast,d0               ;if (xshift==xlast)&&(yshift==ylast)
+		cmp.l   xlast,d0                ;if (xshift==xlast)&&(yshift==ylast)
 		bne.b   .cont
-		cmp.l   _ylast,d0
+		cmp.l   ylast,d0
 		beq.b   .exit                   ;return
 .cont
-		move.l  d0,_xlast               ;_xlast = xshift
-		move.l  d0,_ylast               ;_ylast = yshift
+		move.l  d0,xlast                ;_xlast = xshift
+		move.l  d0,ylast                ;_ylast = yshift
 		lea     _newsky,a0              ;pnewsky = (unsigned *)&newsky[0]
 
 *        for (y=0 ; y<SKYSIZE ; y++)
@@ -106,5 +106,5 @@ _R_MakeSky
 		movem.l (sp)+,d2-d5/a2
 		rts
 
-_xlast          dc.l    -1
-_ylast          dc.l    -1
+xlast           dc.l    -1
+ylast           dc.l    -1

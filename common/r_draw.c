@@ -315,6 +315,8 @@ R_ClipEdge(mvertex_t *pv0, mvertex_t *pv1, clipplane_t *clip)
 #endif /* USE_X86_ASM */
 
 
+#if !defined(USE_M68K_ASM)
+
 /*
 ================
 R_EmitCachedEdge
@@ -349,8 +351,6 @@ R_EmitCachedEdge(void)
     return true;
 }
 
-
-#if !defined(USE_M68K_ASM)
 
 /*
 ================
