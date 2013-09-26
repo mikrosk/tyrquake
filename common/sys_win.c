@@ -322,7 +322,7 @@ Sys_Quit(void)
     exit(0);
 }
 
-#if !defined(USE_X86_ASM) && !defined(USE_M68K_ASM)
+#if !defined(USE_X86_ASM)
 void Sys_SetFPCW(void) {}
 void Sys_PushFPCW_SetHigh(void) {}
 void Sys_PopFPCW(void) {}
