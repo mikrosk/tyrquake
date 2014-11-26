@@ -71,14 +71,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // per-level limits
 //
 //#define       MAX_EDICTS      600     // FIXME: ouch! ouch! ouch!
-#define	MAX_EDICTS	2048	// FIXME: Arbitrary increase, make dynamic?
+#define	MAX_EDICTS	4096	// FIXME: Arbitrary increase, make dynamic?
 #define	MAX_LIGHTSTYLES	64
 /*
  * Model and sound limits depend on the net protocol version being used
  * Standard protocol sends the model/sound index as a byte (max = 256), but
  * other protocols may send as a short (up to 65536, potentially).
  */
-#define MAX_MODELS      1024
+#define MAX_MODELS      2048
 #define MAX_SOUNDS      1024
 
 #define	SAVEGAME_COMMENT_LENGTH	39
