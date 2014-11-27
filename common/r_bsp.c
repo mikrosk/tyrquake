@@ -319,8 +319,8 @@ R_DrawSolidClippedSubmodelPolygons(const entity_t *entity)
     const int numsurfaces = brushmodel->nummodelsurfaces;
     int i, j;
     msurface_t *surf;
-    mvertex_t bverts[MAX_BMODEL_VERTS];
-    bedge_t bedges[MAX_BMODEL_EDGES], *pbedge;
+    static mvertex_t bverts[MAX_BMODEL_VERTS];
+    static bedge_t bedges[MAX_BMODEL_EDGES], *pbedge;
 
     surf = &brushmodel->surfaces[brushmodel->firstmodelsurface];
     for (i = 0; i < numsurfaces; i++, surf++) {

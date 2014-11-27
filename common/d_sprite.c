@@ -385,7 +385,7 @@ D_DrawSprite(void)
     int i, nump;
     float ymin, ymax;
     emitpoint_t *pverts;
-    sspan_t spans[MAXHEIGHT + 1];
+    static sspan_t spans[MAXHEIGHT + 1];
 
     sprite_spans = spans;
 

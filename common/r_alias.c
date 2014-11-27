@@ -885,9 +885,9 @@ R_AliasDrawModel(entity_t *e, alight_t *plighting)
 {
     aliashdr_t *pahdr;
     finalvert_t *pfinalverts;
-    finalvert_t finalverts[CACHE_PAD_ARRAY(MAXALIASVERTS, finalvert_t)];
+    static finalvert_t finalverts[CACHE_PAD_ARRAY(MAXALIASVERTS, finalvert_t)];
     auxvert_t *pauxverts;
-    auxvert_t auxverts[MAXALIASVERTS];
+    static auxvert_t auxverts[MAXALIASVERTS];
 
     r_amodels_drawn++;
 
