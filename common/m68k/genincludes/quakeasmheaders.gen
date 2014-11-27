@@ -4,6 +4,11 @@
 #h "d_local.h"
 #h "d_polyse.h"
 
+#h "d_iface.h"
+#h "mathlib.h"
+#h "model.h"
+#h "render.h"
+
 #s msurface_t MSURFACE
 visframe	VISFRAME
 dlightframe	DLIGHTFRAME
@@ -18,7 +23,6 @@ extents		EXTENTS
 texinfo		TEXINFO
 styles		STYLES
 samples		SAMPLES
-#e
 #l
 
 #s mvertex_t MVERTEX
@@ -27,7 +31,6 @@ samples		SAMPLES
 #s medge_t MEDGE
 v		V
 cachededgeoffset CEO
-#e
 #l
 
 #s mplane_t MPLANE
@@ -78,12 +81,10 @@ surfs		SURFS
 nextremove	NEXTREMOVE
 nearzi		NEARZI
 owner		OWNER
-#e
 #l
 
 #s clipplane_t CLIP
-normal		NORMAL
-dist		DIST
+plane		PLANE
 next		NEXT
 leftedge	LEFTEDGE
 rightedge	RIGHTEDGE
@@ -110,32 +111,16 @@ offsets		OFFSETS
 value		VALUE
 
 #s entity_t ENTITY
-forcelink	FORCELINK
-update_type	UPDATE_TYPE
-baseline	BASELINE
-msgtime		MSGTIME
-msg_origins	MSG_ORIGINS
 origin		ORIGIN
-msg_angles	MSG_ANGLES
 angles		ANGLES
 model		MODEL
-efrag		EFRAG
-frame		FRAME
-syncbase	SYNCBASE
-colormap	COLORMAP
-effects		EFFECTS
-skinnum		SKINNUM
-visframe	VISFRAME
-dlightframe	DLIGHTFRAME
-dlightbits	DLIGHTBITS
-trivial_accept	TRIVIAL_ACCEPT
-topnode		TOPNODE
 #l
 
 #s mnode_t NODE
 contents	CONTENTS
 visframe	VISFRAME
-minmaxs		MINMAXS
+mins		MINS
+maxs		MAXS
 parent		PARENT
 plane		PLANE
 children	CHILDREN
@@ -145,7 +130,8 @@ numsurfaces	NUMSURFACES
 #s mleaf_t LEAF
 contents	CONTENTS
 visframe	VISFRAME
-minmaxs		MINMAXS
+mins		MINS
+maxs		MAXS
 parent		PARENT
 compressed_vis	COMPRESSED_VIS
 efrags		EFRAGS
@@ -211,7 +197,6 @@ prightedgevert2	PREV2
 
 #s affinetridesc_t R
 pskin		PSKIN
-pskindesc	PSKINDESC
 skinwidth	SKINWIDTH
 skinheight	SKINHEIGHT
 ptriangles	PTRIANGLES
@@ -258,9 +243,6 @@ s		S
 t		T
 
 #s dma_t dma
-gamealive	gamealive
-soundalive	soundalive
-splitbuffer	splitbuffer
 channels	channels
 samples		samples
 submission_chunk submission_chunk
@@ -273,13 +255,8 @@ buffer		buffer
 org		ORG
 color		COLOR
 
-#s btofpoly_t BTOFPOLY
-clipflags	CLIPFLAGS
-psurf		PSURF
-
 #s model_t MODEL
 name		NAME
-needload	NEEDLOAD
 type		TYPE
 numframes	NUMFRAMES
 synctype	SYNCTYPE
@@ -287,27 +264,3 @@ flags		FLAGS
 mins		MINS
 maxs		MAXS
 radius		RADIUS
-firstmodelsurface FIRSTMS
-nummodelsurfaces NUMMS
-numsubmodels	NUMSUBMODELS
-submodels	SUBMODELS
-numplanes	NUMPLANES
-planes		PLANES
-numleafs	NUMLEAFS
-leafs		LEAFS
-numvertexes	NUMVERTEXES
-vertexes	VERTEXES
-numedges	NUMEDGES
-edges		EDGES
-numnodes	NUMNODES
-nodes		NODES
-numtexinfo	NUMTEXINFO
-texinfo		TEXINFO
-numsurfaces	NUMSURFACES
-surfaces	SURFACES
-numsurfedges	NUMSURFEDGES
-surfedges	SURFEDGES
-numclipnodes	NUMCLIPNODES
-clipnodes	CLIPNODES
-nummarksurfaces	NUMMARKSURFACES
-marksurfaces	MARKSURFACES
