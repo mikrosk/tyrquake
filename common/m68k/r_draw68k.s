@@ -403,9 +403,9 @@ _R_EmitEdge
 		move.l  _surface_p,d0           ;edge->surfs[0] = surface_p - surfaces
 		sub.l   _surfaces,d0
 		asr.l   #6,d0
-		swap    d0
-		clr     d0
-		move.l  d0,EDGE_SURFS(a2)       ;edge->surfs[1] = 0
+		move.l  d0,EDGE_SURFS+0*4(a2)
+		clr.l	d0
+		move.l  d0,EDGE_SURFS+1*4(a2)   ;edge->surfs[1] = 0
 		fmove.l d2,fp3
 		fmove   fp0,fp2
 		fsub    fp1,fp3
@@ -435,8 +435,9 @@ _R_EmitEdge
 		move.l  _surface_p,d0           ;edge->surfs[0] = 0
 		sub.l   _surfaces,d0
 		asr.l   #6,d0
-		and.l   #$ffff,d0
-		move.l  d0,EDGE_SURFS(a2)       ;edge->surfs[1] = surface_p-surfaces
+		move.l  d0,EDGE_SURFS+1*4(a2)   ;edge->surfs[1] = surface_p-surfaces
+		clr.l	d0
+		move.l  d0,EDGE_SURFS+0*4(a2)
 		fmove.l d2,fp3
 		fsub    fp6,fp3
 		fsub    fp7,fp0
@@ -491,7 +492,7 @@ _R_EmitEdge
 
 .cont16
 		move.l  d0,EDGE_U(a2)
-		tst     EDGE_SURFS(a2)          ;if (edge->surfs[0])
+		tst.l   EDGE_SURFS+0*4(a2)      ;if (edge->surfs[0])
 		beq.b   .cont17
 		addq.l  #1,d0                   ;u_check++
 .cont17
@@ -992,12 +993,12 @@ _R_RenderFace
 *
 *        r_emitted = 1;
 
-		tst     EDGE_SURFS(a0)
+		tst.l   EDGE_SURFS+0*4(a0)
 		bne.b   .contE
-		move    d7,EDGE_SURFS(a0)
+		move.l  d7,EDGE_SURFS+0*4(a0)
 		bra.b   .cont2E
 .contE
-		move    d7,EDGE_SURFS+1*2(a0)
+		move.l  d7,EDGE_SURFS+1*4(a0)
 .cont2E
 		fmove.s EDGE_NEARZI(a0),fp0
 		fcmp.s  _r_nearzi,fp0
@@ -1032,10 +1033,10 @@ _R_RenderFace
 		clr.l   _r_leftclipped
 		clr.l   _r_rightclipped
 		move.l  a2,-(sp)
-		move    MEDGE_V+1*2(a5),d0
+		move.l  MEDGE_V+1*4(a5),d0
 		muls    #MVERTEX_SIZEOF,d0
 		pea     0(a4,d0.l)
-		move    MEDGE_V+0*2(a5),d0
+		move.l  MEDGE_V+0*4(a5),d0
 		muls    #MVERTEX_SIZEOF,d0
 		pea     0(a4,d0.l)
 		jsr     _R_ClipEdge             ;R_ClipEdge (&r_pcu...
@@ -1122,12 +1123,12 @@ _R_RenderFace
 *
 *        r_emitted = 1;
 
-		tst     EDGE_SURFS(a0)
+		tst.l   EDGE_SURFS+0*4(a0)
 		bne.b   .contE2
-		move    d7,EDGE_SURFS(a0)
+		move.l  d7,EDGE_SURFS+0*4(a0)
 		bra.b   .cont2E2
 .contE2
-		move    d7,EDGE_SURFS+1*2(a0)
+		move.l  d7,EDGE_SURFS+1*4(a0)
 .cont2E2
 		fmove.s EDGE_NEARZI(a0),fp0
 		fcmp.s  _r_nearzi,fp0
@@ -1161,10 +1162,10 @@ _R_RenderFace
 		clr.l   _r_leftclipped
 		clr.l   _r_rightclipped
 		move.l  a2,-(sp)
-		move    MEDGE_V+0*2(a5),d0
+		move.l  MEDGE_V+0*4(a5),d0
 		muls    #MVERTEX_SIZEOF,d0
 		pea     0(a4,d0.l)
-		move    MEDGE_V+1*2(a5),d0
+		move.l  MEDGE_V+1*4(a5),d0
 		muls    #MVERTEX_SIZEOF,d0
 		pea     0(a4,d0.l)
 		jsr     _R_ClipEdge             ;R_ClipEdge (&r_pcu...
