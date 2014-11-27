@@ -7,5 +7,4 @@ d_edge: D_DrawSurfaces (vola R_RotateBmodel bez entity + vola D_CacheSurface bez
 r_draw: R_RenderFace (definuje ju bez entity)
 
 r_light: vyzera, ze to bolo dost zmenene (merge z gl quake?)
-r_edge: vola D_DrawSurfaces, ale to by nemal byt problem???
 d_polyse: D_RasterizeAliasPolySmooth je tiez ina ale ani bez nej to nefacha :( (je to z qw, ale frank ma obe asm verzie rovnake)
