@@ -555,14 +555,14 @@ _R_ClipEdge
 .pv1            rs.l    1
 .cp             rs.l    1
 
-		movem.l a2/a3,-(sp)
+		movem.l a2-a4,-(sp)
 		fmovem.x        fp2-fp7,-(sp)
 		move.l  .pv0(sp),a0
 		move.l  .pv1(sp),a1
 		move.l  .cp(sp),a2
 		bsr     DoRecursion
 		fmovem.x        (sp)+,fp2-fp7
-		movem.l (sp)+,a2/a3
+		movem.l (sp)+,a2-a4
 		rts
 
 DoRecursion
@@ -572,12 +572,14 @@ DoRecursion
 		beq.w   .add
 .loop
 
-*                        d0 = DotProduct (pv0->position, clip->normal) - clip->dist;
-*                        d1 = DotProduct (pv1->position, clip->normal) - clip->dist;
+*                        plane = &clip->plane;
+*                        d0 = DotProduct (pv0->position, plane->normal) - plane->dist;
+*                        d1 = DotProduct (pv1->position, plane->normal) - plane->dist;
 
-		fmove.s CLIP_NORMAL(a2),fp0
-		fmove.s CLIP_NORMAL+4(a2),fp1
-		fmove.s CLIP_NORMAL+8(a2),fp2
+		lea		CLIP_PLANE(a2),a4
+		fmove.s MPLANE_NORMAL(a4),fp0
+		fmove.s MPLANE_NORMAL+4(a4),fp1
+		fmove.s MPLANE_NORMAL+8(a4),fp2
 		fmove.s (a0),fp3
 		fmove   fp3,fp5                 ;fp5 = pv0->position[0]
 		fmul    fp0,fp3
@@ -596,7 +598,7 @@ DoRecursion
 		fmove.s 8(a1),fp1               ;fp1 = pv1->position[2]
 		fmul    fp1,fp2
 		fadd    fp2,fp0
-		fmove.s CLIP_DIST(a2),fp2
+		fmove.s MPLANE_DIST(a4),fp2
 		fsub    fp2,fp3                 ;fp3 = d0
 		fsub    fp2,fp0                 ;fp0 = d1
 		fmove.s 4(a1),fp2               ;fp2 = pv1->position[1]
