@@ -592,7 +592,7 @@ void
 R_ScanEdges(void)
 {
     int iv, bottom;
-    espan_t basespans[CACHE_PAD_ARRAY(MAXSPANS, espan_t)];
+    static espan_t basespans[CACHE_PAD_ARRAY(MAXSPANS, espan_t)];
     espan_t *basespan_p;
     surf_t *s;
 

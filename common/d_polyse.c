@@ -23,32 +23,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "quakedef.h"
 #include "r_local.h"
 #include "d_local.h"
+#include "d_polyse.h"
 
 // TODO: put in span spilling to shrink list size
 // !!! if this is changed, it must be changed in d_polysa.s too !!!
 #define DPS_MAXSPANS MAXHEIGHT+1
 			// 1 extra for spanpackage that marks end
-
-// !!! if this is changed, it must be changed in asm_draw.h too !!!
-typedef struct {
-    void *pdest;
-    short *pz;
-    int count;
-    byte *ptex;
-    int sfrac, tfrac, light, zi;
-} spanpackage_t;
-
-typedef struct {
-    int isflattop;
-    int numleftedges;
-    int *pleftedgevert0;
-    int *pleftedgevert1;
-    int *pleftedgevert2;
-    int numrightedges;
-    int *prightedgevert0;
-    int *prightedgevert1;
-    int *prightedgevert2;
-} edgetable;
 
 int r_p0[6], r_p1[6], r_p2[6];
 
@@ -79,7 +59,6 @@ int d_aspancount, d_countextrastep;
 
 spanpackage_t *a_spans;
 spanpackage_t *d_pedgespanpackage;
-static int ystart;
 byte *d_pdest, *d_ptex;
 short *d_pz;
 int d_sfrac, d_tfrac, d_light, d_zi;
@@ -90,14 +69,11 @@ int d_sfracbasestep, d_tfracbasestep;
 int d_ziextrastep, d_zibasestep;
 int d_pzextrastep, d_pzbasestep;
 
-typedef struct {
-    int quotient;
-    int remainder;
-} adivtab_t;
-
+#if !defined(USE_M68K_ASM)
 static adivtab_t adivtab[32 * 32] = {
 #include "adivtab.h"
 };
+#endif
 
 byte *skintable[MAX_LBM_HEIGHT];
 static int skinwidth;
@@ -646,6 +622,7 @@ D_RasterizeAliasPolySmooth(void)
     int initialleftheight, initialrightheight;
     int *plefttop, *prighttop, *pleftbottom, *prightbottom;
     int working_lstepx, originalcount;
+    int ystart;
 
     plefttop = pedgetable->pleftedgevert0;
     prighttop = pedgetable->prightedgevert0;

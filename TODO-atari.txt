@@ -1,7 +1,0 @@
-d_polyse.c: obsahuje nejake divne #ifdefs pre X86, vynechava sa tam
-&0xfff...
-
-treba prepisat v asm:
-r_bsp: R_RotateBmodel (berie parameter entity), R_RecursiveWorldNode (berie parameter entity + vola R_RenderPoly, ktora uz neexistuje + vola R_RenderFace bez entity)
-d_edge: D_DrawSurfaces (vola R_RotateBmodel bez entity + vola D_CacheSurface bez entity)
-r_draw: R_RenderFace (definuje ju bez entity)

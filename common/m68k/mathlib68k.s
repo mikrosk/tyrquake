@@ -4,7 +4,13 @@
 ** written by Frank Wille <frank@phoenix.owl.de>
 **
 
-	INCLUDE	"quakedef68k.i"
+	IFD	NQ_HACK
+	INCLUDE	"quakedef68k-nq.i"
+	ELSE
+	IFD	QW_HACK
+	INCLUDE	"quakedef68k-qw.i"
+	ENDIF
+	ENDIF
 
 
 

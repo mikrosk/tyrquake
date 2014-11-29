@@ -20,6 +20,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // d_sprite.c: software top-level rasterization driver module for drawing
 // sprites
 
+
 #include <float.h>
 
 #include "d_local.h"
@@ -384,7 +385,7 @@ D_DrawSprite(void)
     int i, nump;
     float ymin, ymax;
     emitpoint_t *pverts;
-    sspan_t spans[MAXHEIGHT + 1];
+    static sspan_t spans[MAXHEIGHT + 1];
 
     sprite_spans = spans;
 

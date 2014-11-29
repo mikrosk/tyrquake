@@ -3,7 +3,13 @@
 ** r_edge.c assembler implementations by Frank Wille <frank@phoenix.owl.de>
 **
 
-		INCLUDE	"quakedef68k.i"
+		IFD	NQ_HACK
+		INCLUDE	"quakedef68k-nq.i"
+		ELSE
+		IFD	QW_HACK
+		INCLUDE	"quakedef68k-qw.i"
+		ENDIF
+		ENDIF
 
 		XREF    _r_bmodelactive
 		XREF    _surfaces
@@ -325,10 +331,8 @@ _R_GenerateSpans
 		move.l  d4,d7
 		moveq   #20,d0
 		asr.l   d0,d4
-		move.l  EDGE_SURFS(a5),d1
-		move.l  d1,d0
-		swap    d0
-		ext.l   d0
+		move.l	EDGE_SURFS+4(a5),d1
+		move.l  EDGE_SURFS(a5),d0
 		beq.b   .cont
 		asl.l   #SURF_SIZEOF_EXP,d0
 		lea     0(a3,d0.l),a0
@@ -394,7 +398,7 @@ _R_GenerateSpans
 *        // it's adding a new surface in, so find the correct place
 *                surf = &surfaces[edge->surfs[1]];
 *
-		ext.l   d1
+		tst.l   d1
 		beq.w   .next
 		asl.l   #SURF_SIZEOF_EXP,d1
 		lea     0(a3,d1.l),a1           ;surf = &surfaces[edge->surfs[1]]
