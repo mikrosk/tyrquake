@@ -549,7 +549,7 @@ _R_ClipEdge
 
 		rsreset
 .fpuregs        rs.x    6
-.intregs        rs.l    2
+.intregs        rs.l    3
 		rs.l    1
 .pv0            rs.l    1
 .pv1            rs.l    1
