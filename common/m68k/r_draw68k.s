@@ -31,7 +31,6 @@
 		XREF    _r_edges
 		XREF    _r_outofsurfaces
 		XREF    _r_outofedges
-		XREF    _r_pcurrentvertbase
 		XREF    _r_polycount
 		XREF    _r_currentkey
 		XREF    _c_faceclip
@@ -54,8 +53,7 @@
 		XREF    _newedges
 		XREF    _removeedges
 		XREF    _view_clipplanes
-		XREF    _insubmodel
-		XREF    _currententity
+		XREF    _r_worldentity
 		XREF    _makeleftedge
 		XREF    _makerightedge
 
@@ -792,7 +790,7 @@ DoRecursion
 
 ******************************************************************************
 *
-*       void _R_RenderFace (msurface_t *fa, int clipflags)
+*       void _R_RenderFace(const entity_t *e, msurface_t *fa, int clipflags)
 *
 ******************************************************************************
 
@@ -804,6 +802,7 @@ _R_RenderFace
 .fpuregs        rs.x    5
 .intregs        rs.l    11
 		rs.l    1
+.e              rs.l    1
 .fa             rs.l    1
 .clipflags      rs.l    1
 
@@ -837,8 +836,8 @@ _R_RenderFace
 .cont
 		move.l  MSURFACE_NUMEDGES(a3),d1
 		move.l  d1,d2
-		asl.l   #EDGE_SIZEOF_EXP,d1
-		add.l   #4*EDGE_SIZEOF,d1
+		addq.l	#4,d1
+		muls.l	#EDGE_SIZEOF,d1
 		move.l  _edge_p,d6
 		add.l   d6,d1                   ;edge_p + fa->numedges + 4
 		cmp.l   _edge_max,d1            ;if d1 >= edge_max
@@ -888,20 +887,28 @@ _R_RenderFace
 *        r_nearzi = 0;
 *        r_nearzionly = false;
 *        makeleftedge = makerightedge = false;
-*        pedges = currententity->model->edges;
+*        pedges = brushmodel->edges;
 *        r_lastvertvalid = false;
+*        const qboolean insubmodel = e->model != r_worldentity.model;
 
 		clr.l   _r_emitted
 		clr.l   _r_nearzi
 		clr.l   _r_nearzionly
 		clr.l   _makeleftedge
 		clr.l   _makerightedge
-		move.l  _currententity,a0
-		move.l  ENTITY_MODEL(a0),a6
-		move.l  MODEL_EDGES(a6),d4      ;pedges = currententity->mod...
+		
+		movea.l	_r_worldentity,a0
+		move.l  ENTITY_MODEL(a0),d4	; d4: r_worldentity.model
+		movea.l	.e(sp),a0
+		movea.l	ENTITY_MODEL(a0),a0	; a0: e->model
+		cmp.l	a0,d4
+		sne	.insubmodel
+		
+		lea	-BRUSHMODEL_MODEL(a0),a6
+		move.l  BRUSHMODEL_EDGES(a6),d4      ;pedges = brushmodel->edges...
 		clr.l   _r_lastvertvalid
 		move.l  _r_edges,d5
-		move.l  _r_pcurrentvertbase,a4
+		movea.l BRUSHMODEL_VERTEXES(a6),a4
 		move.l  _surface_p,d7
 		sub.l   _surfaces,d7
 		asr.l   #6,d7
@@ -911,13 +918,13 @@ _R_RenderFace
 
 *        for (i=0 ; i<fa->numedges ; i++)
 *        {
-*                lindex = currententity->model->surfedges[fa->firstedge + i];
+*                lindex = brushmodel->surfedges[fa->firstedge + i];
 
 .loop
-		move.l  MODEL_SURFEDGES(a6),a1  ;&currententity->model->surfedges
+		move.l  BRUSHMODEL_SURFEDGES(a6),a1  ;&brushmodel->surfedges
 		move.l  MSURFACE_FIRSTEDGE(a3),d0
 		add.l   d3,d0                   ;fa->firstedge + i
-		move.l  0(a1,d0.l*4),d0         ;lindex = currententity->model...
+		move.l  0(a1,d0.l*4),d0         ;lindex = brushmodel...
 
 *                if (lindex > 0)
 
@@ -928,11 +935,11 @@ _R_RenderFace
 *                // if the edge is cached, we can just reuse the edge
 *                        if (!insubmodel)
 
-		asl.l   #MEDGE_SIZEOF_EXP,d0
+		muls.l  #MEDGE_SIZEOF,d0
 		add.l   d4,d0
 		move.l  d0,a5
 		move.l  a5,_r_pedge             ;r_pedge = &pedges[lindex]
-		tst.l   _insubmodel             ;if (!insubmodel)
+		tst.b   .insubmodel             ;if (!insubmodel)
 		bne.b   .nosub
 
 *                                if (r_pedge->cachededgeoffset & FULLY_CLIPPED_CACHED)
@@ -1031,10 +1038,10 @@ _R_RenderFace
 		clr.l   _r_rightclipped
 		move.l  a2,-(sp)
 		move.l  MEDGE_V+1*4(a5),d0
-		muls    #MVERTEX_SIZEOF,d0
+		muls.l  #MVERTEX_SIZEOF,d0
 		pea     0(a4,d0.l)
 		move.l  MEDGE_V+0*4(a5),d0
-		muls    #MVERTEX_SIZEOF,d0
+		muls.l  #MVERTEX_SIZEOF,d0
 		pea     0(a4,d0.l)
 		jsr     _R_ClipEdge             ;R_ClipEdge (&r_pcu...
 		add     #12,sp
@@ -1058,11 +1065,11 @@ _R_RenderFace
 *                // if the edge is cached, we can just reuse the edge
 *                        if (!insubmodel)
 
-		asl.l   #MEDGE_SIZEOF_EXP,d0
+		muls.l  #MEDGE_SIZEOF,d0
 		add.l   d4,d0
 		move.l  d0,a5
 		move.l  a5,_r_pedge             ;r_pedge = &pedges[lindex]
-		tst.l   _insubmodel             ;if (!insubmodel)
+		tst.b   .insubmodel             ;if (!insubmodel)
 		bne.b   .nosub2
 
 *                                if (r_pedge->cachededgeoffset & FULLY_CLIPPED_CACHED)
@@ -1160,10 +1167,10 @@ _R_RenderFace
 		clr.l   _r_rightclipped
 		move.l  a2,-(sp)
 		move.l  MEDGE_V+0*4(a5),d0
-		muls    #MVERTEX_SIZEOF,d0
+		muls.l  #MVERTEX_SIZEOF,d0
 		pea     0(a4,d0.l)
 		move.l  MEDGE_V+1*4(a5),d0
-		muls    #MVERTEX_SIZEOF,d0
+		muls.l  #MVERTEX_SIZEOF,d0
 		pea     0(a4,d0.l)
 		jsr     _R_ClipEdge             ;R_ClipEdge (&r_pcu...
 		add     #12,sp
@@ -1234,7 +1241,7 @@ _R_RenderFace
 *        surface_p->flags = fa->flags;
 *        surface_p->insubmodel = insubmodel;
 *        surface_p->spanstate = 0;
-*        surface_p->entity = currententity;
+*        surface_p->entity = e;
 *        surface_p->key = r_currentkey++;
 *        surface_p->spans = NULL;
 
@@ -1249,9 +1256,11 @@ _R_RenderFace
 		clr.l   (a0)+                   ;surface_p->spanstate = 0
 		move.l  MSURFACE_FLAGS(a3),(a0)+ ;surface_p->flags = fa->flags
 		move.l  a3,(a0)+                ;surface_p->data = (void *)fa
-		move.l  _currententity,(a0)+    ;surface_p->entity = currententity
+		move.l  .e(sp),(a0)+            ;surface_p->entity = e
 		move.l  _r_nearzi,(a0)+         ;surface_p->nearzi = r_nearzi
-		move.l  _insubmodel,(a0)+       ;surface_p->insubmodel = insubmodel
+		move.b	.insubmodel,d0
+		and.l	#1,d0
+		move.l  d0,(a0)+       ;surface_p->insubmodel = insubmodel
 
 *        pplane = fa->plane;
 
@@ -1336,3 +1345,5 @@ _R_RenderFace
 		fmovem.x        (sp)+,fp2-fp6
 		movem.l (sp)+,d2-d7/a2-a6
 		rts
+
+.insubmodel	ds.b	1

@@ -20,8 +20,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 // r_draw.c
 
-#undef USE_M68K_ASM
-
 #include "quakedef.h"
 #include "r_local.h"
 #include "d_local.h"		// FIXME: shouldn't need to include this
@@ -362,7 +360,7 @@ R_RenderFace
 void
 R_RenderFace(const entity_t *e, msurface_t *fa, int clipflags)
 {
-    const brushmodel_t *brushmodel = BrushModel(e->model);
+    const brushmodel_t *brushmodel = ConstBrushModel(e->model);
     const qboolean insubmodel = e->model != r_worldentity.model;
     int i, lindex;
     unsigned mask;

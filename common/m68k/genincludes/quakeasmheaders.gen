@@ -264,3 +264,9 @@ flags		FLAGS
 mins		MINS
 maxs		MAXS
 radius		RADIUS
+
+#s brushmodel_t BRUSHMODEL
+model		MODEL
+vertexes	VERTEXES
+edges		EDGES
+surfedges	SURFEDGES
