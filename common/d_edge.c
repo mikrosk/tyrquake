@@ -18,8 +18,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 
-#undef USE_M68K_ASM
-
 #include <stdint.h>
 
 #include "d_local.h"
@@ -228,13 +226,11 @@ D_DrawSurfaces(void)
 		if (s->insubmodel) {
 		    // FIXME: we don't want to do all this for every polygon!
 		    // TODO: store once at start of frame
-		    e = s->entity;	//FIXME: make this passed in to
-		    // R_RotateBmodel ()
+		    e = s->entity;
 		    VectorSubtract(r_origin, e->origin, local_modelorg);
 		    TransformVector(local_modelorg, transformed_modelorg);
 
-		    R_RotateBmodel(e);	// FIXME: don't mess with the frustum,
-		    // make entity passed in
+		    R_RotateBmodel(e);
 		}
 
 		D_CalcGradients(pface);
@@ -260,20 +256,17 @@ D_DrawSurfaces(void)
 		if (s->insubmodel) {
 		    // FIXME: we don't want to do all this for every polygon!
 		    // TODO: store once at start of frame
-		    e = s->entity;	//FIXME: make this passed in to
-		    // R_RotateBmodel ()
+		    e = s->entity;
 		    VectorSubtract(r_origin, e->origin, local_modelorg);
 		    TransformVector(local_modelorg, transformed_modelorg);
 
-		    R_RotateBmodel(e);	// FIXME: don't mess with the frustum,
-		    // make entity passed in
+		    R_RotateBmodel(e);
 		}
 
 		pface = s->data;
 		miplevel = D_MipLevelForScale(s->nearzi * scale_for_mip
 					      * pface->texinfo->mipadjust);
 
-		// FIXME: make this passed in to D_CacheSurface
 		pcurrentcache = D_CacheSurface(e, pface, miplevel);
 
 		cacheblock = (pixel_t *)pcurrentcache->data;

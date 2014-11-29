@@ -845,8 +845,8 @@ else ifeq ($(USE_M68K_ASM),Y)
 COMMON_CPPFLAGS += -DUSE_M68K_ASM
 COMMON_OBJS += common68k.o mathlib68k.o
 CL_OBJS   += snd_atari_asm.o
-# r_light68k.o d_edge68k.o  r_bsp68k.o
-SW_OBJS += nonintel.o d_scan68k.o r_surf68k.o r_sky68k.o r_misc68k.o r_alias68k.o r_aclip68k.o d_sprite68k.o d_sky68k.o d_part68k.o r_edge68k.o d_polyset68k.o r_draw68k.o
+# r_light68k.o r_bsp68k.o
+SW_OBJS += nonintel.o d_scan68k.o r_surf68k.o r_sky68k.o r_misc68k.o r_alias68k.o r_aclip68k.o d_sprite68k.o d_sky68k.o d_part68k.o r_edge68k.o d_polyset68k.o r_draw68k.o d_edge68k.o
 else
 SW_OBJS += nonintel.o
 endif

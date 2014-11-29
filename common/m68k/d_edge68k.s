@@ -34,7 +34,7 @@
 		XREF    _transformed_modelorg
 		XREF    _miplevel
 		XREF    _cl_entities
-		XREF    _currententity
+		XREF    _r_worldentity
 		XREF    _r_drawflat
 		XREF    _surfaces
 		XREF    _surface_p
@@ -48,7 +48,6 @@
 		XREF    _base_vup
 		XREF    _base_vright
 		XREF	_base_modelorg
-		XREF    _d_drawspans
 		XREF    _scale_for_mip
 		XREF    _d_scalemip
 		XREF    _d_minmip
@@ -64,6 +63,7 @@
 		XREF    _Turbulent8
 		XREF    _R_RotateBmodel
 		XREF    _D_CacheSurface
+		XREF    _D_DrawSpans
 
 		XDEF    _D_CalcGradients
 		XDEF    _D_DrawSurfaces
@@ -291,14 +291,14 @@ _D_CalcGradients
 _D_DrawSurfaces
 
 
-		movem.l d2/a2-a4,-(sp)
+		movem.l d2/a2-a5,-(sp)
 		fmovem.x        fp2-fp7,-(sp)
 
-*        currententity = &cl_entities[0];
+*        e = &r_worldentity;
 *        TransformVector (modelorg, transformed_modelorg);
 *        VectorCopy (transformed_modelorg, world_transformed_modelorg);
 
-		move.l  #_cl_entities,_currententity
+		lea _r_worldentity,a5
 
 ******  TransformVector (inlined)
 
@@ -492,21 +492,17 @@ _D_DrawSurfaces
 *                                {
 *                                // FIXME: we don't want to do all this for every polygon!
 *                                // TODO: store once at start of frame
-*                                        currententity = s->entity;      //FIXME: make this passed in to
-*                                                                                                // R_RotateBmodel ()
-*                                        VectorSubtract (r_origin, currententity->origin,
-*                                                        local_modelorg);
+*                                        e = s->entity;
+*                                        VectorSubtract (r_origin, e->origin, local_modelorg);
 *                                        TransformVector (local_modelorg, transformed_modelorg);
 *
-*                                        R_RotateBmodel ();      // FIXME: don't mess with the frustum,
-*                                                                                // make entity passed in
+*                                        R_RotateBmodel(e);
 *                                }
 
 		tst.l   SURF_INSUBMODEL(a2)
 		beq.b   .nosub
-		move.l  SURF_ENTITY(a2),a0
-		move.l  a0,_currententity
-		lea     ENTITY_ORIGIN(a0),a0
+		movea.l SURF_ENTITY(a2),a5
+		lea     ENTITY_ORIGIN(a5),a0
 
 ******  VectorSubtract (inlined)
 
@@ -554,7 +550,9 @@ _D_DrawSurfaces
 
 ****** end of TransformVector
 
+		move.l	a5,-(sp)
 		jsr     _R_RotateBmodel
+		addq.l	#4,sp
 
 *                                D_CalcGradients (pface);
 *                                Turbulent8 (s->spans);
@@ -576,7 +574,7 @@ _D_DrawSurfaces
 *                                // FIXME: we don't want to do this every time!
 *                                // TODO: speed up
 *                                //
-*                                        currententity = &cl_entities[0];
+*                                        e = &r_worldentity;
 *                                        VectorCopy (world_transformed_modelorg,
 *                                                                transformed_modelorg);
 *                                        VectorCopy (base_vpn, vpn);
@@ -588,7 +586,7 @@ _D_DrawSurfaces
 
 		tst.l   SURF_INSUBMODEL(a2)
 		beq.w   .next2
-		move.l  #_cl_entities,_currententity
+		lea     _r_worldentity,a5
 		fmove.s fp3,(a4)+
 		fmove.s fp4,(a4)+
 		fmove.s fp5,(a4)+
@@ -681,20 +679,17 @@ _D_DrawSurfaces
 *                                {
 *                                // FIXME: we don't want to do all this for every polygon!
 *                                // TODO: store once at start of frame
-*                                        currententity = s->entity;      //FIXME: make this passed in to
-*                                                                                                // R_RotateBmodel ()
-*                                        VectorSubtract (r_origin, currententity->origin, local_modelorg);
+*                                        e = s->entity;
+*                                        VectorSubtract (r_origin, e->origin, local_modelorg);
 *                                        TransformVector (local_modelorg, transformed_modelorg);
 *
-*                                        R_RotateBmodel ();      // FIXME: don't mess with the frustum,
-*                                                                                // make entity passed in
+*                                        R_RotateBmodel(e);
 *                                }
 
 		tst.l   SURF_INSUBMODEL(a2)
 		beq.b   .nosub2
-		move.l  SURF_ENTITY(a2),a0
-		move.l  a0,_currententity
-		lea     ENTITY_ORIGIN(a0),a0
+		move.l  SURF_ENTITY(a2),a5
+		lea     ENTITY_ORIGIN(a5),a0
 
 ****** VectorSubtract (inlined)
 
@@ -742,15 +737,16 @@ _D_DrawSurfaces
 
 ******  end of TransformVector
 
+		move.l	a5,-(sp)
 		jsr     _R_RotateBmodel
+		addq.l	#4,sp
 .nosub2
 
 *                                pface = s->data;
 *                                miplevel = D_MipLevelForScale (s->nearzi * scale_for_mip
 *                                * pface->texinfo->mipadjust);
 *
-*                        // FIXME: make this passed in to D_CacheSurface
-*                                pcurrentcache = D_CacheSurface (pface, miplevel);
+*                                pcurrentcache = D_CacheSurface (e, pface, miplevel);
 *
 *                                cacheblock = (pixel_t *)pcurrentcache->data;
 *                                cachewidth = pcurrentcache->width;
@@ -783,8 +779,9 @@ _D_DrawSurfaces
 		move.l  d0,_miplevel
 		move.l  d0,-(sp)
 		move.l  a3,-(sp)
+		move.l	a5,-(sp)
 		jsr     _D_CacheSurface
-		addq    #8,sp
+		lea     12(sp),sp
 		move.l  d0,a0
 		lea     SURFCACHE_DATA(a0),a1
 		move.l  a1,_cacheblock
@@ -792,7 +789,7 @@ _D_DrawSurfaces
 
 *                                D_CalcGradients (pface);
 *
-*                                (*d_drawspans) (s->spans);
+*                                (*D_DrawSpans) (s->spans);
 *
 *                                D_DrawZSpans (s->spans);
 
@@ -800,7 +797,7 @@ _D_DrawSurfaces
 		jsr     _D_CalcGradients
 		addq    #4,sp
 		move.l  SURF_SPANS(a2),-(sp)
-		move.l  _d_drawspans,a0
+		move.l  _D_DrawSpans,a0
 		jsr     (a0)
 		jsr     _D_DrawZSpans
 		addq    #4,sp
@@ -812,7 +809,7 @@ _D_DrawSurfaces
 *                                // FIXME: we don't want to do this every time!
 *                                // TODO: speed up
 *                                //
-*                                        currententity = &cl_entities[0];
+*                                        e = &r_worldentity;
 *                                        VectorCopy (world_transformed_modelorg,
 *                                                                transformed_modelorg);
 *                                        VectorCopy (base_vpn, vpn);
@@ -824,7 +821,7 @@ _D_DrawSurfaces
 
 		tst.l   SURF_INSUBMODEL(a2)
 		beq.w   .next2
-		move.l  #_cl_entities,_currententity
+		lea     _r_worldentity,a5
 		fmove.s fp3,(a4)+
 		fmove.s fp4,(a4)+
 		fmove.s fp5,(a4)+
@@ -915,5 +912,5 @@ _D_DrawSurfaces
 		bra.w   .loop2
 .end
 		fmovem.x        (sp)+,fp2-fp7
-		movem.l (sp)+,d2/a2-a4
+		movem.l (sp)+,d2/a2-a5
 		rts
