@@ -63,8 +63,7 @@
 		XDEF    _R_ClipEdge
 		XDEF    _R_RenderFace
 
-;TODO: vasm limitation
-;NEAR_CLIP               equ.s   0.01            ;must match the def. in r_local.h
+NEAR_CLIP               equ.s   0.01            ;must match the def. in r_local.h
 FULLY_CLIPPED_CACHED    =       $80000000
 FRAMECOUNT_MASK         =       $7FFFFFFF
 
@@ -177,11 +176,9 @@ _R_EmitEdge
 
 ******  end of TransformVector
 
-		;fcmp.s  #NEAR_CLIP,fp3          ;if transformed[2] < NEAR_CLIP
-		fcmp.s	#0.01,fp3
+		fcmp.s  #NEAR_CLIP,fp3          ;if transformed[2] < NEAR_CLIP
 		fboge.w .cont
-		;fmove.s #NEAR_CLIP,fp3          ;transformed[2] = NEAR_CLIP
-		fmove.s	#0.01,fp3
+		fmove.s #NEAR_CLIP,fp3          ;transformed[2] = NEAR_CLIP
 .cont
 		fmove.s #1,fp2
 		fdiv    fp3,fp2                 ;lzi0 = 1.0 / transformed[2]
@@ -282,11 +279,9 @@ _R_EmitEdge
 
 ******  end of TransformVector
 
-		;fcmp.s  #NEAR_CLIP,fp3          ;if transformed[2] < NEAR_CLIP
-		fcmp.s	#0.01,fp3
+		fcmp.s  #NEAR_CLIP,fp3          ;if transformed[2] < NEAR_CLIP
 		fboge.w .cont6
-		;fmove.s #NEAR_CLIP,fp3          ;transformed[2] = NEAR_CLIP
-		fmove.s	#0.01,fp3
+		fmove.s #NEAR_CLIP,fp3          ;transformed[2] = NEAR_CLIP
 .cont6
 		fmove.s #1,fp5
 		fdiv    fp3,fp5                 ;r_lzi1 = 1.0 / transformed[2]
