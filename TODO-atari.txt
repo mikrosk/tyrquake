@@ -1,5 +1,0 @@
-treba prepisat v asm:
-r_bsp: R_RotateBmodel (berie parameter entity), R_RecursiveWorldNode (berie parameter entity
-	+ vola R_RenderPoly, ktora uz neexistuje + vola R_RenderFace bez entity)
-
-r_light: vyzera, ze to bolo dost zmenene (merge z gl quake?)
