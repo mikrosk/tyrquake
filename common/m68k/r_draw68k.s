@@ -897,7 +897,7 @@ _R_RenderFace
 		clr.l   _makeleftedge
 		clr.l   _makerightedge
 		
-		movea.l	_r_worldentity,a0
+		lea	_r_worldentity,a0
 		move.l  ENTITY_MODEL(a0),d4	; d4: r_worldentity.model
 		movea.l	.e(sp),a0
 		movea.l	ENTITY_MODEL(a0),a0	; a0: e->model
