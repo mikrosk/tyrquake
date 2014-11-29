@@ -16,8 +16,6 @@
 		XREF    _r_currentkey
 		XREF    _r_drawpolys
 		XREF    _r_worldpolysbacktofront
-		XREF    _pbtofpolys
-		XREF    _numbtofpolys
 		XREF    _pfrustum_indexes
 		XREF    _modelorg
 		XREF    _vpn
@@ -25,12 +23,9 @@
 		XREF    _vup
 		XREF    _cl
 		XREF    _view_clipplanes
-		XREF    _currententity
 		XREF    _screenedge
 		XREF    _entity_rotation
 
-		XREF    _R_StoreEfrags
-		XREF    _R_RenderPoly
 		XREF    _R_RenderFace
 
 		XDEF    _R_RotateBmodel
@@ -39,6 +34,8 @@
 
 
 CONTENTS_SOLID          =       -2              ;bspfile.h
+BMODEL_FULLY_CLIPPED	=	$10		;r_local.h
+
 PLANE_X                 =       0
 PLANE_Y                 =       1
 PLANE_Z                 =       2
@@ -53,7 +50,7 @@ ROLL                    =       2
 
 ******************************************************************************
 *
-*       void _R_RotateBmodel (void)
+*       void _R_RotateBmodel (const entity_t *e)
 *
 ******************************************************************************
 
@@ -64,7 +61,7 @@ _R_RotateBmodel
 		lea     -9*4(sp),sp
 		move.l  sp,a2                   ;a2 -> temp2
 		lea     _entity_rotation,a3
-		move.l  _currententity,a0
+		movea.l 2*4+6*12+9*4+4(sp),a0	; a2/a3, fp2-fp7, 9*4, addr
 		lea     sincostab,a1
 		fmove.s #8,fp7
 		fmove.s ENTITY_ANGLES+YAW*4(a0),fp0
@@ -258,7 +255,7 @@ EntityRotate
 
 ******************************************************************************
 *
-*       void _R_RecursiveWorldNode (mnode_t *node, int clipflags)
+*       void _R_RecursiveWorldNode (const entity_t *e, mnode_t *node)
 *
 ******************************************************************************
 
@@ -267,164 +264,50 @@ _R_RecursiveWorldNode
 
 		rsreset
 		rs.l    1
+.e		rs.l	1
 .node           rs.l    1
-.clipflags      rs.l    1
 
 		move.l  .node(sp),a0
-		move.l  .clipflags(sp),d0
+		move.l  .e(sp),d0
 		bsr     DoRecursion
 		rts
 
 DoRecursion
-		movem.l d2-d5/a2/a3,-(sp)
-		fmovem.x        fp2-fp6,-(sp)
+		movem.l d2-d4/a2/a3,-(sp)
+		fmovem.x        fp2-fp3,-(sp)
 		move.l  d0,d2
 		move.l  a0,a2
 
-*        if (node->contents == CONTENTS_SOLID)
-*                return;         // solid
-*
-*        if (node->visframe != r_visframecount)
-*                return;
+*    if (node->contents == CONTENTS_SOLID)
+*	return;
+*    if (node->visframe != r_visframecount)
+*	return;
+*    if (node->clipflags == BMODEL_FULLY_CLIPPED)
+*	return;
 
 		cmp.l   #CONTENTS_SOLID,NODE_CONTENTS(a2)
 		beq.w   .end
 		move.l  NODE_VISFRAME(a2),d0
 		cmp.l   _r_visframecount,d0
 		bne.w   .end
+		cmp.l	#BMODEL_FULLY_CLIPPED,NODE_CLIPFLAGS(a2)
+		beq.w	.end
 
-*        if (clipflags)
-*        {
-*                for (i=0 ; i<4 ; i++)
+*    if (node->contents < 0)
 
-		tst.l   d2
-		beq.b   .noclip
-		move.l  d2,d1
-		moveq   #4-1,d0
-		lea     _pfrustum_indexes,a0
-		lea     _view_clipplanes,a1
-		moveq   #0,d4
-
-*                        if (! (clipflags & (1<<i)) )
-*                                continue;       // don't need to clip against it
-
-.loop
-		lsr.b   #1,d1                   ; if (! (clipflags & (1<<i))
-		bcc.b   .next
-
-*                        pindex = pfrustum_indexes[i];
-*
-*                        rejectpt[0] = (float)node->minmaxs[pindex[0]];
-*                        rejectpt[1] = (float)node->minmaxs[pindex[1]];
-*                        rejectpt[2] = (float)node->minmaxs[pindex[2]];
-*
-*                        d = DotProduct (rejectpt, view_clipplanes[i].normal);
-*                        d -= view_clipplanes[i].dist;
-*
-*                        if (d <= 0)
-*                                return;
-
-		fmove.s (a1)+,fp3
-		fmove.s (a1)+,fp4
-		fmove.s (a1)+,fp5
-		fmove.s (a1)+,fp6
-		lea     -16(a1),a1
-		move.l  (a0),a3
-		move.l  (a3)+,d3
-		fmove.w NODE_MINMAXS(a2,d3.l*2),fp0 ;rejectpt[0] = ...
-		move.l  (a3)+,d3
-		fmove.w NODE_MINMAXS(a2,d3.l*2),fp1 ;rejectpt[1] = ...
-		move.l  (a3)+,d3
-		fmove.w NODE_MINMAXS(a2,d3.l*2),fp2 ;rejectpt[2] = ...
-		fmul    fp3,fp0
-		fmul    fp4,fp1
-		fmul    fp5,fp2
-		fadd    fp1,fp0
-		fadd    fp2,fp0                 ;d = DotProduct(...)
-		fsub    fp6,fp0                 ;d -= view_clipplanes[1].dist
-		ftst    fp0                     ;if (d <= 0)
-		fbole.w .end                    ;return
-
-*                        acceptpt[0] = (float)node->minmaxs[pindex[3+0]];
-*                        acceptpt[1] = (float)node->minmaxs[pindex[3+1]];
-*                        acceptpt[2] = (float)node->minmaxs[pindex[3+2]];
-*
-*                        d = DotProduct (acceptpt, view_clipplanes[i].normal);
-*                        d -= view_clipplanes[i].dist;
-*
-*                        if (d >= 0)
-*                                clipflags &= ~(1<<i);   // node is entirely on screen
-
-		move.l  (a3)+,d3
-		fmove.w NODE_MINMAXS(a2,d3.l*2),fp0 ;acceptpt[0] = ...
-		move.l  (a3)+,d3
-		fmove.w NODE_MINMAXS(a2,d3.l*2),fp1 ;acceptpt[1] = ...
-		move.l  (a3)+,d3
-		fmove.w NODE_MINMAXS(a2,d3.l*2),fp2 ;acceptpt[2] = ...
-		fmul    fp3,fp0
-		fmul    fp4,fp1
-		fmul    fp5,fp2
-		fadd    fp1,fp0
-		fadd    fp2,fp0                 ;d = DotProduct(...)
-		fsub    fp6,fp0                 ;d -= view_clipplanes[1].dist
-		ftst    fp0                     ;if (d >= 0)
-		fbolt.w .next
-		bclr    d4,d2                   ;clipflags &= ~(1<<i)
-.next
-		addq    #1,d4
-		lea     CLIP_SIZEOF(a1),a1
-		addq.l  #4,a0
-		dbra    d0,.loop
-
-*        if (node->contents < 0)
-
-.noclip
 		tst.l   NODE_CONTENTS(a2)
 		bge.b   .else
 
-*                pleaf = (mleaf_t *)node;
+*	pleaf = (mleaf_t *)node;
+*	pleaf->key = r_currentkey;
+*	r_currentkey++;		// all bmodels in a leaf share the same key
 *
-*                mark = pleaf->firstmarksurface;
-*                c = pleaf->nummarksurfaces;
-*
-*                if (c)
-*                {
-*                        do
-*                        {
-*                                (*mark)->visframe = r_framecount;
-*                                mark++;
-*                        } while (--c);
-*                }
+*	return;
 
-		move.l  LEAF_FIRSTMARKSURFACE(a2),a3 ;mark = pleaf->first...
-		move.l  LEAF_NUMMARKSURFACES(a2),d0  ;c = pleaf->nummark...
-		subq    #1,d0                   ;if (c)
-		bmi.b   .cont
-		move.l  _r_framecount,d1
-.loop2
-		move.l  (a3)+,a0                ;(*mark)->visframe = r_framecount
-		move.l  d1,MSURFACE_VISFRAME(a0)
-		dbra    d0,.loop2
-
-*                if (pleaf->efrags)
-*                {
-*                        R_StoreEfrags (&pleaf->efrags);
-*                }
-*
-*                pleaf->key = r_currentkey;
-*                r_currentkey++;         // all bmodels in a leaf share the same key
-
-.cont
-		tst.l   LEAF_EFRAGS(a2)         ;if (pleaf->efrags)
-		beq.b   .cont2
-		pea     LEAF_EFRAGS(a2)
-		jsr     _R_StoreEfrags          ;R_StoreEfrags (...)
-		addq    #4,sp
-.cont2
 		move.l  _r_currentkey,LEAF_KEY(a2)
 		addq.l  #1,_r_currentkey        ;r_currentkey++
 		bra.w   .end
-
+		
 *                plane = node->plane;
 *
 *                switch (plane->type)
@@ -491,171 +374,54 @@ DoRecursion
 		moveq   #1,d3                   ;side = 1
 .ge
 
-*                R_RecursiveWorldNode (node->children[side], clipflags);
+*                R_RecursiveWorldNode(e, node->children[side]);
 
 		move.l  d2,d0
 		move.l  NODE_CHILDREN(a2,d3.l*4),a0
 		bsr     DoRecursion
-		move.l  _r_framecount,d5
 
 *                c = node->numsurfaces;
 *
 *                if (c)
 
-		move    NODE_NUMSURFACES(a2),d4 ;c = node->numsurfaces
-		subq    #1,d4                   ;if (c)
-		bmi.w   .skip
+		move.l  NODE_NUMSURFACES(a2),d4 ;c = node->numsurfaces
+		subq.l  #1,d4                   ;if (c)
+		bmi.b   .skip
 
 *                        surf = cl.worldmodel->surfaces + node->firstsurface;
 *
-*                        if (dot < -BACKFACE_EPSILON)
-*                        {
-
 		move.l  _cl+CL_WORLDMODEL,a0    ;surf = cl.worldmodel + ...
-		move.l  MODEL_SURFACES(a0),a3
-		moveq   #0,d0
-		move    NODE_FIRSTSURFACE(a2),d0
-		asl.l   #MSURFACE_SIZEOF_EXP,d0
-		add.l   d0,a3
-		fcmp.s  #-BACKFACE_EPSILON,fp2   ;if (dot < -BACKFACE_EPSILON)
-		fboge.w .else2
+		move.l  BRUSHMODEL_SURFACES(a0),a3
+		move.l  NODE_FIRSTSURFACE(a2),d0
+		muls.l   #MSURFACE_SIZEOF,d0
+		add.l   d0,a3	; a3 = surf
+		
+*	for (count = node->numsurfaces; count; count--, surf++) {
+*	    if (surf->visframe != r_visframecount)
+*		continue;
+*	    if (surf->clipflags == BMODEL_FULLY_CLIPPED)
+*		continue;
+*	    R_RenderFace(e, surf, surf->clipflags);
+*	}
 
-*                                        if ((surf->flags & SURF_PLANEBACK) &&
-*                                                (surf->visframe == r_framecount))
-*                                        {
-*                                                if (r_drawpolys)
-*                                                {
-*                                                        if (r_worldpolysbacktofront)
-*                                                        {
-*                                                                if (numbtofpolys < MAX_BTOFPOLYS)
-*                                                                {
-*                                                                        pbtofpolys[numbtofpolys].clipflags =
-*                                                                                        clipflags;
-*                                                                        pbtofpolys[numbtofpolys].psurf = surf;
-*                                                                        numbtofpolys++;
-*                                                                }
-*                                                        }
-*                                                        else
-*                                                        {
-*                                                                R_RenderPoly (surf, clipflags);
-*                                                        }
-*                                                }
-*                                                else
-*                                                {
-*                                                        R_RenderFace (surf, clipflags);
-*                                                }
-*                                        }
-
+		
 .loop3
-		move.l  MSURFACE_FLAGS(a3),d0   ;if ((surf->flags & SURF_PLANEBACK) &&
-		and.l   #SURF_PLANEBACK,d0
-		beq.b   .next2
-		cmp.l   MSURFACE_VISFRAME(a3),d5 ;(surf->visframe == r_framecount))
-		bne.b   .next2
-		tst.l   _r_drawpolys            ;if (r_drawpolys)
-		beq.b   .nopoly
-		tst.l   _r_worldpolysbacktofront ;if (r_worldpolysbacktofront)
-		beq.b   .renderpoly
-		move.l  _numbtofpolys,d0
-		cmp.l   #MAX_BTOFPOLYS,d0
-		bge.b   .next2
-		move.l  _pbtofpolys,a1
-		move.l  d2,BTOFPOLY_CLIPFLAGS(a1,d0.l*8)
-		move.l  a3,BTOFPOLY_PSURF(a1,d0.l*8)
-		addq.l  #1,_numbtofpolys
-		bra.b   .next2
-.renderpoly
-		move.l  d2,-(sp)
+		move.l	_r_visframecount,d0
+		cmp.l	MSURFACE_VISFRAME(a3),d0
+		bne.b	.next3
+		cmp.l	#BMODEL_FULLY_CLIPPED,MSURFACE_CLIPFLAGS(a3)
+		beq.b	.next3
+		
+		move.l  MSURFACE_CLIPFLAGS(a3),-(sp)
 		move.l  a3,-(sp)
-		jsr     _R_RenderPoly
-		addq    #8,sp
-		bra.b   .next2
-.nopoly
-		move.l  d2,-(sp)
-		move.l  a3,-(sp)
+		move.l	d2,-(sp)
 		jsr     _R_RenderFace
-		addq    #8,sp
-.next2
-
-*                                        surf++;
-*                                } while (--c);
-
-		lea     MSURFACE_SIZEOF(a3),a3
-		dbra    d4,.loop3
-		bra.b   .else3
-.else2
-
-*                        else if (dot > BACKFACE_EPSILON)
-*                        {
-
-		fcmp.s  #BACKFACE_EPSILON,fp2
-		fbole.w .else3
-
-*                                        if (!(surf->flags & SURF_PLANEBACK) &&
-*                                                (surf->visframe == r_framecount))
-*                                        {
-*                                                if (r_drawpolys)
-*                                                {
-*                                                        if (r_worldpolysbacktofront)
-*                                                        {
-*                                                                if (numbtofpolys < MAX_BTOFPOLYS)
-*                                                                {
-*                                                                        pbtofpolys[numbtofpolys].clipflags =
-*                                                                                        clipflags;
-*                                                                        pbtofpolys[numbtofpolys].psurf = surf;
-*                                                                        numbtofpolys++;
-*                                                                }
-*                                                        }
-*                                                        else
-*                                                        {
-*                                                                R_RenderPoly (surf, clipflags);
-*                                                        }
-*                                                }
-*                                                else
-*                                                {
-*                                                        R_RenderFace (surf, clipflags);
-*                                                }
-*                                        }
-
-.loop4
-		move.l  MSURFACE_FLAGS(a3),d0
-		and.l   #SURF_PLANEBACK,d0
-		bne.b   .next3
-		cmp.l   MSURFACE_VISFRAME(a3),d5
-		bne.b   .next3
-		tst.l   _r_drawpolys
-		beq.b   .nopoly2
-		tst.l   _r_worldpolysbacktofront
-		beq.b   .renderpoly2
-		move.l  _numbtofpolys,d0
-		cmp.l   #MAX_BTOFPOLYS,d0
-		bge.b   .next3
-		move.l  _pbtofpolys,a1
-		move.l  d2,BTOFPOLY_CLIPFLAGS(a1,d0.l*8)
-		move.l  a3,BTOFPOLY_PSURF(a1,d0.l*8)
-		addq.l  #1,_numbtofpolys
-		bra.b   .next3
-.renderpoly2
-		move.l  d2,-(sp)
-		move.l  a3,-(sp)
-		jsr     _R_RenderPoly
-		addq    #8,sp
-		bra.b   .next3
-.nopoly2
-		move.l  d2,-(sp)
-		move.l  a3,-(sp)
-		jsr     _R_RenderFace
-		addq    #8,sp
+		lea    12(sp),sp
 .next3
-
-*                                        surf++;
-*                                } while (--c);
-
 		lea     MSURFACE_SIZEOF(a3),a3
-		dbra    d4,.loop4
-.else3
+		dbra	d4,.loop3
 
-*                        r_currentkey++;
+*	r_currentkey++;
 
 		addq.l  #1,_r_currentkey
 .skip
@@ -667,8 +433,8 @@ DoRecursion
 		move.l  NODE_CHILDREN(a2,d3.l*4),a0
 		bsr     DoRecursion
 .end
-		fmovem.x        (sp)+,fp2-fp6
-		movem.l (sp)+,d2-d5/a2/a3
+		fmovem.x        (sp)+,fp2-fp3
+		movem.l (sp)+,d2-d4/a2/a3
 		rts
 
 

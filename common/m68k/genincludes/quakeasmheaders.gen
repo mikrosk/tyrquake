@@ -11,6 +11,7 @@
 
 #s msurface_t MSURFACE
 visframe	VISFRAME
+clipflags	CLIPFLAGS
 dlightframe	DLIGHTFRAME
 dlightbits	DLIGHTBITS
 plane		PLANE
@@ -119,6 +120,7 @@ model		MODEL
 #s mnode_t NODE
 contents	CONTENTS
 visframe	VISFRAME
+clipflags	CLIPFLAGS
 mins		MINS
 maxs		MAXS
 parent		PARENT
@@ -269,4 +271,5 @@ radius		RADIUS
 model		MODEL
 vertexes	VERTEXES
 edges		EDGES
+surfaces	SURFACES
 surfedges	SURFEDGES
