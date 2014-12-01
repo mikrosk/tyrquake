@@ -137,6 +137,8 @@ R_PushDlights(void)
 /* Light Sampling                                                            */
 /* --------------------------------------------------------------------------*/
 
+#if !defined(USE_M68K_ASM)
+
 #ifdef GLQUAKE
 vec3_t lightspot;
 #endif
@@ -191,7 +193,7 @@ R_LightSurfPoint(const mnode_t *node, const vec3_t surfpoint)
     return -1;
 }
 
-#if !defined(USE_M68K_ASM)
+
 
 static int
 RecursiveLightPoint(const mnode_t *node, const vec3_t start, const vec3_t end)
