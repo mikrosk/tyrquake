@@ -91,7 +91,7 @@ SNAPSHOT_TARGET = $(DIST_DIR)/tyrquake-$(TYR_VERSION_NUM)-osx.dmg
 else ifeq ($(TARGET_UNIX),mint)
 VID_TARGET ?= atari
 IN_TARGET ?= atari
-SND_TARGET ?= null
+SND_TARGET ?= atari
 CD_TARGET ?= null
 USE_XF86DGA ?= N
 USE_X86_ASM ?= N
