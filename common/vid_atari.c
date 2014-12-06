@@ -39,6 +39,7 @@
 #include "vid_atari_asm.h"
 
 //#define NO_ATARI_VIDEO
+//#define NO_SUPERVIDEL
 
 viddef_t	vid;				// global video state
 
@@ -68,6 +69,7 @@ int vid_modenum = VID_MODE_NONE;
 
 static long CheckSvPresence( void )
 {
+#ifdef NO_SUPERVIDEL
 	typedef struct
 	{
 		long cookie;
@@ -89,7 +91,7 @@ static long CheckSvPresence( void )
 
 		} while( (pCookie++)->cookie != 0L );
 	}
-
+#endif
 	return 0;
 }
 
@@ -116,11 +118,34 @@ void	VID_Init (const byte *palette)
 	vid.numpages = 1;
 	vid.colormap = host_colormap;
 	vid.fullbright = 256 - LittleLong (*((int *)vid.colormap + 2048));
-	vid.buffer = vid.conbuffer = vid_buffer;
 	vid.rowbytes = vid.conrowbytes = BASEWIDTH * sizeof( pixel_t );
 	
-	d_pzbuffer = zbuffer;
-	D_InitCaches (surfcache, sizeof(surfcache));
+	d_pzbuffer = (short*)malloc( BASEWIDTH*BASEHEIGHT * sizeof(short) + 15 );	//zbuffer;
+	
+	byte* surfcache = (byte*)malloc( 4*1024*1024 + 15 );
+	
+	if( d_pzbuffer == NULL || surfcache == NULL )
+	{
+		Sys_Error( "Not enough memory to buffers!\n" );
+		return;
+	}
+	
+	if( !isSvPresent || !vga )
+	{
+	  vid.buffer = vid.conbuffer = (byte*)malloc( BASEWIDTH*BASEHEIGHT + 15 );	//vid_buffer;
+	  if( vid.buffer == NULL )
+	  {
+		  Sys_Error( "Not enough memory for vid.buffer!\n" );
+		  return;
+	  }
+	  vid.buffer = vid.conbuffer = (byte*)( ( (long)vid.buffer + 15 ) & 0xfffffff0 );
+	}
+	
+	// we can't release these buffers anymore
+	d_pzbuffer = (short*)( ( (long)d_pzbuffer + 15 ) & 0xfffffff0 );
+	surfcache = (byte*)( ( (long)surfcache + 15 ) & 0xfffffff0 );
+	
+	D_InitCaches (surfcache, /*sizeof(surfcache)*/ 4*1024*1024 );
 	
 	// alloc triplebuffer
 	screen1 = (char*)Mxalloc( 3 * ( vid.width * (vga ? 240 : vid.height) * sizeof( pixel_t ) ) + 15, MX_STRAM );
@@ -139,11 +164,24 @@ void	VID_Init (const byte *palette)
 	memset( screen2, 0, vid.width * (vga ? 240 : vid.height) * sizeof( pixel_t ) );
 	memset( screen3, 0, vid.width * (vga ? 240 : vid.height) * sizeof( pixel_t ) );
 	
+	if( isSvPresent && vga )
+	{
+	  vid.buffer = (char*)( (long)screen + 0xA0000000 );
+	}
+	
 	#ifndef NO_ATARI_VIDEO
 	video_atari_init( screen1 );
 	if( vga )
 	{
-		VsetMode( BPS8 | COL40 | VGA | VERTFLAG );
+		if( isSvPresent )
+		{
+			#define BPS8C 0x0007
+			VsetMode( BPS8C | COL40 | VGA | VERTFLAG );
+		}
+		else
+		{
+			VsetMode( BPS8 | COL40 | VGA | VERTFLAG );
+		}
 	}
 	else
 	{
@@ -168,14 +206,21 @@ void	VID_Update (vrect_t *rects)
 	char* temp;
 	
 	#ifndef NO_ATARI_VIDEO
-	temp = screen + ( isSvPresent ? 0xA0000000 : 0x00000000 );
-	video_atari_c2p( vid.buffer, temp + ( vga ? ( ( 240 - vid.height ) / 2 ) * vid.rowbytes : 0 ), vid.width * vid.height * sizeof( pixel_t ) );
+	if( !isSvPresent || !vga )
+	{
+		video_atari_c2p( vid.buffer, screen + ( vga ? ( ( 240 - vid.height ) / 2 ) * vid.rowbytes : 0 ), vid.width * vid.height * sizeof( pixel_t ) );
+	}
 
 	// cycle 3 screens
 	temp	= screen1;
 	screen1	= screen2;	// now physical screen = logical screen (i.e. "screen")
 	screen2	= screen3;
 	screen3 = temp;
+	
+	if( isSvPresent && vga )
+	{
+	  vid.buffer = (char*)( (long)screen + 0xA0000000 );
+	}
 	#endif
 }
 
