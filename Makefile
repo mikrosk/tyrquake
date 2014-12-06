@@ -284,7 +284,7 @@ CFLAGS += $(call cc-option,-ffast-math,)
 endif
 
 ifeq ($(TARGET_UNIX),mint)
-CFLAGS  += -Dfloorf=floor -m68060
+CFLAGS  += -Dfloorf=floor -m68060 -DATARI
 ASFLAGS += -phxass -m68060 -Faout -quiet -DATARI -DM881 -Icommon/m68k
 endif
 

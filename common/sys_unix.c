@@ -186,6 +186,19 @@ Sys_mkdir(const char *path)
 double
 Sys_DoubleTime(void)
 {
+#ifdef ATARI
+    // don't use the expensive unix calls
+    static int secbase;
+    clock_t ticks = clock();
+
+    if( !secbase )
+    {
+	secbase = (int)( (double)ticks / CLOCKS_PER_SEC );	// get seconds
+	return 0;
+    }
+
+    return ( (double)ticks / CLOCKS_PER_SEC ) - secbase;
+#else
     struct timeval tp;
     struct timezone tzp;
     static int secbase;
@@ -198,6 +211,7 @@ Sys_DoubleTime(void)
     }
 
     return (tp.tv_sec - secbase) + tp.tv_usec / 1000000.0;
+#endif
 }
 
 #if defined(NQ_HACK) || defined(SERVERONLY)
