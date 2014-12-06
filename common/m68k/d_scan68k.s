@@ -67,8 +67,8 @@ SPEED                   =       20              ;--
 _D_WarpScreen
 
 		rsreset
-.rowptr         rs.l    1024
-.column         rs.l    1280
+.rowptr         rs.l    1200			;MAXHEIGHT
+.column         rs.l    2040			;MAXWIDTH
 .stackframe     rs.l    0
 
 		movem.l d2-d7/a2-a6,-(sp)
@@ -155,19 +155,17 @@ _D_WarpScreen
 *        dest = vid.buffer + scr_vrect.y * vid.rowbytes + scr_vrect.x;
 *        for (v=0 ; v<scr_vrect.height ; v++, dest += vid.rowbytes)
 *        {
-*                col = &column[turb[v]];
+*                col = &column[turb[v & (TURB_CYCLE - 1)]];
 *                row = &rowptr[v];
 *                for (u=0 ; u<scr_vrect.width ; u+=4)
 *                {
-*                        dest[u+0] = row[turb[u+0]][col[u+0]];
-*                        dest[u+1] = row[turb[u+1]][col[u+1]];
-*                        dest[u+2] = row[turb[u+2]][col[u+2]];
-*                        dest[u+3] = row[turb[u+3]][col[u+3]];
+*                        dest[u + 0] = row[turb[(u + 0) & (TURB_CYCLE - 1)]][col[u + 0]];
+*                        dest[u + 1] = row[turb[(u + 1) & (TURB_CYCLE - 1)]][col[u + 1]];
+*                        dest[u + 2] = row[turb[(u + 2) & (TURB_CYCLE - 1)]][col[u + 2]];
+*                        dest[u + 3] = row[turb[(u + 3) & (TURB_CYCLE - 1)]][col[u + 3]];
 *                }
 *        }
 		move.l  VRECT_WIDTH(a5),d6
-		lsr     #2,d6
-		subq    #1,d6
 		move.l  VRECT_HEIGHT(a5),d7
 
 		fmove.d _cl+CL_TIME,fp0         ;get cl.time
@@ -175,7 +173,7 @@ _D_WarpScreen
 		fmove.l fp0,d4                  ;(int)(cl.time*SPEED)
 		and.l   #CYCLE-1,d4             ;(int)(cl.time*SPEED)&(CYCLE-1)
 		lsl.l   #2,d4
-		add.l   #_intsintable,d4        ;turb = _intsintable + 4*d0
+		add.l   #_intsintable,d4        ;turb = _intsintable + 4*d4
 
 		move.l  VRECT_Y(a5),d3
 		mulu    d5,d3                   ;vid.rowbytes * scr_vrect.y
@@ -184,30 +182,49 @@ _D_WarpScreen
 
 		moveq   #0,d1
 .loop3
-		move    d6,d0
+		moveq	#0,d0
 		move.l  d4,a6                   ;a6 -> turb[u]
-		move.l  0(a6,d1.l*4),d2         ;d2 = turb[v]
+		move	d1,d2
+		and.l	#CYCLE-1,d2
+		move.l  0(a6,d2.l*4),d2         ;d2 = turb[v]
 		move.l  d3,a0                   ;a0 -> dest[u]
 		lea     0(a1,d2.l*4),a4         ;col = &column[turb[v]]
 		lea     0(a2,d1.l*4),a5         ;row = &rowptr[v]
 .loop4
-		move.l  (a6)+,d2                ;d2 = turb[u+0]
-		move.l  0(a5,d2.l*4),a3         ;a3 = row[turb[u+0]]
+		move	d0,d2			;d2 = u + 0 TODO: optimize
+		and.l	#CYCLE-1,d2		;d2 = (u + 0) & (TURB_CYCLE - 1)
+		move.l	0(a6,d2.l*4),d2         ;d2 = turb[(u + 0) & (TURB_CYCLE - 1)]
+		move.l  0(a5,d2.l*4),a3         ;a3 = row[turb[(u + 0) & (TURB_CYCLE - 1)]]
 		move.l  (a4)+,d2                ;d2 = col[u+0]
 		move.b  0(a3,d2.l),(a0)+        ;dest[u+0]=row[turb[u+0][col[u+0]]
-		move.l  (a6)+,d2                ;same for u=1,2,3
+		addq	#1,d0
+		
+		move	d0,d2			;same for u=1,2,3
+		and.l	#CYCLE-1,d2
+		move.l	0(a6,d2.l*4),d2
 		move.l  0(a5,d2.l*4),a3
 		move.l  (a4)+,d2
 		move.b  0(a3,d2.l),(a0)+
-		move.l  (a6)+,d2
+		addq	#1,d0
+		
+		move	d0,d2
+		and.l	#CYCLE-1,d2
+		move.l	0(a6,d2.l*4),d2
 		move.l  0(a5,d2.l*4),a3
 		move.l  (a4)+,d2
 		move.b  0(a3,d2.l),(a0)+
-		move.l  (a6)+,d2
+		addq	#1,d0
+		
+		move	d0,d2
+		and.l	#CYCLE-1,d2
+		move.l	0(a6,d2.l*4),d2
 		move.l  0(a5,d2.l*4),a3
 		move.l  (a4)+,d2
 		move.b  0(a3,d2.l),(a0)+
-		dbra    d0,.loop4
+		addq	#1,d0
+		
+		cmp	d6,d0
+		blt.b   .loop4
 		add.l   d5,d3
 		addq    #1,d1
 		cmp     d7,d1

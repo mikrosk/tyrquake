@@ -20,13 +20,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /* Portable C scan-level rasterization code, all pixel depths. */
 
-//#undef USE_M68K_ASM
-
 #include <stdint.h>
 
 #include "quakedef.h"
 #include "r_local.h"
 #include "d_local.h"
+
+
 
 unsigned char *r_turb_pbase, *r_turb_pdest;
 fixed16_t r_turb_s, r_turb_t, r_turb_sstep, r_turb_tstep;
