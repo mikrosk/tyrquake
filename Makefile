@@ -152,6 +152,7 @@ AS = vasm
 CC = $(TARGET)-gcc
 STRIP = $(TARGET)-strip -s
 STACK = $(TARGET)-stack --fix=512k
+PRGFLAGS = $(TARGET)-flags -S
 endif
 else
 EXT=
@@ -265,6 +266,7 @@ DX_INC    = $(TOPDIR)/wine-dx
 STRIP   ?= strip
 WINDRES ?= windres
 STACK   ?=
+PRGFLAGS ?=
 
 ASFLAGS ?=
 CFLAGS  ?=
@@ -284,7 +286,7 @@ CFLAGS += $(call cc-option,-ffast-math,)
 endif
 
 ifeq ($(TARGET_UNIX),mint)
-CFLAGS  += -Dfloorf=floor -m68060
+CFLAGS  += -Dfloorf=floor -m68060 -DATARI
 ASFLAGS += -phxass -m68060 -Faout -quiet -DATARI -DM881 -Icommon/m68k
 endif
 
@@ -425,6 +427,9 @@ quiet_cmd_strip = '  STRIP    $(1)'
 
 quiet_cmd_stack = '  STACK    $(1)'
       cmd_stack = $(STACK) $(1)
+      
+quiet_cmd_prgflags = '  PRGFLAGS $(1)'
+      cmd_prgflags = $(PRGFLAGS) $(1)
 
 ifeq ($(DEBUG),Y)
 do_strip=
@@ -445,6 +450,17 @@ else
 define do_stack
 	@echo $(call $(quiet)cmd_stack,$(1));
 	@$(call cmd_stack,$(1));
+endef
+endif
+
+ifneq ($(TARGET_UNIX),mint)
+do_prgflags=
+else ifeq ($(STACK),)
+do_prgflags=
+else
+define do_prgflags
+	@echo $(call $(quiet)cmd_prgflags,$(1));
+	@$(call cmd_prgflags,$(1));
 endef
 endif
 
@@ -1051,6 +1067,7 @@ $(BIN_DIR)/tyr-quake$(EXT):	$(patsubst %,$(NQSWDIR)/%,$(ALL_NQSW_OBJS))
 	$(call do_cc_link,$(ALL_NQSW_LFLAGS))
 	$(call do_strip,$@)
 	$(call do_stack,$@)
+	$(call do_prgflags,$@)
 
 $(BIN_DIR)/tyr-glquake$(EXT):	$(patsubst %,$(NQGLDIR)/%,$(ALL_NQGL_OBJS))
 	$(call do_cc_link,$(ALL_NQGL_LFLAGS))
@@ -1060,6 +1077,7 @@ $(BIN_DIR)/tyr-qwcl$(EXT):	$(patsubst %,$(QWSWDIR)/%,$(ALL_QWSW_OBJS))
 	$(call do_cc_link,$(ALL_QWSW_LFLAGS))
 	$(call do_strip,$@)
 	$(call do_stack,$@)
+	$(call do_prgflags,$@)
 
 $(BIN_DIR)/tyr-glqwcl$(EXT):	$(patsubst %,$(QWGLDIR)/%,$(ALL_QWGL_OBJS))
 	$(call do_cc_link,$(ALL_QWGL_LFLAGS))
