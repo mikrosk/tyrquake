@@ -837,7 +837,7 @@ _R_RenderFace
 		move.l  MSURFACE_NUMEDGES(a3),d1
 		move.l  d1,d2
 		addq.l	#4,d1
-		muls.l	#EDGE_SIZEOF,d1
+		asl.l	#EDGE_SIZEOF_EXP,d1
 		move.l  _edge_p,d6
 		add.l   d6,d1                   ;edge_p + fa->numedges + 4
 		cmp.l   _edge_max,d1            ;if d1 >= edge_max
@@ -935,7 +935,7 @@ _R_RenderFace
 *                // if the edge is cached, we can just reuse the edge
 *                        if (!insubmodel)
 
-		muls.l  #MEDGE_SIZEOF,d0
+		asl.l   #MEDGE_SIZEOF_EXP,d0
 		add.l   d4,d0
 		move.l  d0,a5
 		move.l  a5,_r_pedge             ;r_pedge = &pedges[lindex]
@@ -1038,10 +1038,10 @@ _R_RenderFace
 		clr.l   _r_rightclipped
 		move.l  a2,-(sp)
 		move.l  MEDGE_V+1*4(a5),d0
-		muls.l  #MVERTEX_SIZEOF,d0
+		asl.l   #MVERTEX_SIZEOF_EXP,d0
 		pea     0(a4,d0.l)
 		move.l  MEDGE_V+0*4(a5),d0
-		muls.l  #MVERTEX_SIZEOF,d0
+		asl.l   #MVERTEX_SIZEOF_EXP,d0
 		pea     0(a4,d0.l)
 		jsr     _R_ClipEdge             ;R_ClipEdge (&r_pcu...
 		add     #12,sp
@@ -1065,7 +1065,7 @@ _R_RenderFace
 *                // if the edge is cached, we can just reuse the edge
 *                        if (!insubmodel)
 
-		muls.l  #MEDGE_SIZEOF,d0
+		asl.l   #MEDGE_SIZEOF_EXP,d0
 		add.l   d4,d0
 		move.l  d0,a5
 		move.l  a5,_r_pedge             ;r_pedge = &pedges[lindex]
@@ -1167,10 +1167,10 @@ _R_RenderFace
 		clr.l   _r_rightclipped
 		move.l  a2,-(sp)
 		move.l  MEDGE_V+0*4(a5),d0
-		muls.l  #MVERTEX_SIZEOF,d0
+		asl.l   #MVERTEX_SIZEOF_EXP,d0
 		pea     0(a4,d0.l)
 		move.l  MEDGE_V+1*4(a5),d0
-		muls.l  #MVERTEX_SIZEOF,d0
+		asl.l   #MVERTEX_SIZEOF_EXP,d0
 		pea     0(a4,d0.l)
 		jsr     _R_ClipEdge             ;R_ClipEdge (&r_pcu...
 		add     #12,sp

@@ -151,6 +151,7 @@ typedef struct edge_s {
     struct edge_s *nextremove;
     float nearzi;
     medge_t *owner;
+    byte padding[28];
 } edge_t;
 
 #endif // GLQUAKE

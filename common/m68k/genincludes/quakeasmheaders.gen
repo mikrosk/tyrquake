@@ -24,14 +24,17 @@ extents		EXTENTS
 texinfo		TEXINFO
 styles		STYLES
 samples		SAMPLES
+#e
 #l
 
 #s mvertex_t MVERTEX
+#e
 #l
 
 #s medge_t MEDGE
 v		V
 cachededgeoffset CEO
+#e
 #l
 
 #s mplane_t MPLANE
@@ -82,6 +85,7 @@ surfs		SURFS
 nextremove	NEXTREMOVE
 nearzi		NEARZI
 owner		OWNER
+#e
 #l
 
 #s clipplane_t CLIP

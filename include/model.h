@@ -82,6 +82,7 @@ BRUSH MODELS
 // !!! if this is changed, it must be changed in asm_draw.h too !!!
 typedef struct {
     vec3_t position;
+    byte padding[4];
 } mvertex_t;
 
 typedef struct texture_s {
@@ -115,6 +116,7 @@ typedef struct texture_s {
 typedef struct {
     unsigned int v[2];
     unsigned int cachededgeoffset;
+    byte padding[4];
 } medge_t;
 
 typedef struct {
@@ -171,6 +173,8 @@ typedef struct msurface_s {
 
     byte styles[MAXLIGHTMAPS];
     byte *samples;		// [numstyles*surfsize]
+    
+    byte padding[36];
 } msurface_t;
 
 /*

@@ -168,7 +168,7 @@ DoRecursion
 		move.l  _cl+CL_WORLDMODEL,a0    ;surf = cl.worldmodel + ...
 		move.l  BRUSHMODEL_SURFACES(a0),a0
 		move.l  NODE_FIRSTSURFACE(a3),d0
-		muls.l  #MSURFACE_SIZEOF,d0
+		asl.l   #MSURFACE_SIZEOF_EXP,d0
 		add.l   d0,a0
 
 		move.l  NODE_NUMSURFACES(a3),d6 ;node->numsurfaces
