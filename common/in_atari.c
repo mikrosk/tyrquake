@@ -48,6 +48,8 @@ static knum_t unshiftToAscii[128];
 static knum_t shiftToAscii[128];
 static knum_t capsToAscii[128];
 
+static qboolean isInputInitialized = false;
+
 void
 IN_Init(void)
 {
@@ -154,12 +156,17 @@ IN_Init(void)
 	shiftToAscii[0x59] = K_MWHEELUP;	// eiffel only
 	shiftToAscii[0x5a] = K_MWHEELDOWN;	// eiffel only
 	shiftToAscii[0x5b] = '~';	// eiffel only
+	
+	isInputInitialized = true;
 }
 
 void
 IN_Shutdown(void)
 {
-    atari_ikbd_shutdown();
+	if( isInputInitialized )
+	{
+		atari_ikbd_shutdown();
+	}
 }
 
 void
