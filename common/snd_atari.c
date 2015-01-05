@@ -29,6 +29,7 @@
 
 #include "quakedef.h"
 #include "sound.h"
+#include "console.h"
 
 dma_t atari_shm;
 
@@ -69,13 +70,13 @@ qboolean SNDDMA_Init(void)
 	
 	shm->samples = DMA_BUFFER_SIZE/2;	// number of mono samples
 	shm->submission_chunk = 1;
-	shm->buffer = (char*)Mxalloc( DMA_BUFFER_SIZE + 1, MX_STRAM );
+	shm->buffer = (unsigned char*)Mxalloc( DMA_BUFFER_SIZE + 1, MX_STRAM );
 	if( shm->buffer == NULL )
 	{
 		Con_Printf("Not enough memory for dma buffer\n");
 		return false;
 	}
-	shm->buffer = (char*)( ( (int)shm->buffer + 1 ) & 0xfffffffe );
+	shm->buffer = (unsigned char*)( ( (unsigned long)shm->buffer + 1 ) & 0xfffffffe );
 	
 	memset( shm->buffer, 0, DMA_BUFFER_SIZE );
 	

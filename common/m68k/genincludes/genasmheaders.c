@@ -149,10 +149,10 @@ main(int argc,char *argv[])
                   }
                   fprintf(fc,"    }\n"
                              "    else {\n"
-                             "      printf(\"Size of %s can't be represented "
-                             "by a base-2 exponent.\\n\");\n"
+                             "      printf(\"Size of %s (%%d) can't be represented "
+                             "by a base-2 exponent.\\n\", sizeof(%s));\n"
                              "      exit(20);\n"
-                             "    }\n",structname);
+                             "    }\n",structname,structname);
                 }
                 else
                   printf("Can't write exponential size yet!\n");
