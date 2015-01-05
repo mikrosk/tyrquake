@@ -173,10 +173,10 @@ VID_Init(const byte *palette)
 	(void)VsetMode( BPS8 | COL40 | TV | PAL );
     }
     
-    VID_SetPalette(palette);
-    
     isVideoInitialized = true;
     #endif
+    
+    VID_SetPalette(palette);
 }
 
 void
