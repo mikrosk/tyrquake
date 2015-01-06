@@ -854,22 +854,28 @@ M_Keys_Key(knum_t keynum)
 static void
 M_Menu_Video_f(void)
 {
+    #ifndef ATARI
     key_dest = key_menu;
     m_state = m_video;
     m_entersound = true;
     VID_MenuInitState(&modelist[vid_modenum]);
+    #endif
 }
 
 static void
 M_Video_Draw(void)
 {
+    #ifndef ATARI
     (*vid_menudrawfn)();
+    #endif
 }
 
 static void
 M_Video_Key(knum_t keynum)
 {
+    #ifndef ATARI
     (*vid_menukeyfn)(keynum);
+    #endif
 }
 
 //=============================================================================
