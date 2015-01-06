@@ -186,7 +186,7 @@ Sys_mkdir(const char *path)
 double
 Sys_DoubleTime(void)
 {
-#ifdef ATARI
+#ifdef __MINT__
     // don't use the expensive unix calls
     static int secbase;
     clock_t ticks = clock();

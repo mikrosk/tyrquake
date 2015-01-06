@@ -309,7 +309,7 @@ SCR_SetUpToDrawConsole(void)
     }
 
     if (clearconsole++ < vid.numpages) {
-#ifdef GLQUAKE
+#if defined(GLQUAKE) || defined(__MINT__)
 	scr_copytop = 1;
 	Draw_TileClear(0, (int)scr_con_current, vid.width,
 		       vid.height - (int)scr_con_current);
