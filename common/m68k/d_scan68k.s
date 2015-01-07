@@ -23,8 +23,6 @@
 		XREF    _d_zistepv
 		XREF    _sadjust
 		XREF    _tadjust
-		XREF    _sdivz
-		XREF    _tdivz
 		XREF    _bbextents
 		XREF    _bbextentt
 		XREF    _d_viewbuffer

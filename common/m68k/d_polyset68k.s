@@ -48,21 +48,7 @@
 		XREF    _d_tfrac
 		XREF    _d_light
 		XREF    _d_zi
-		XREF    _d_pdestextrastep
-		XREF    _d_pzextrastep
 		XREF    _d_countextrastep
-		XREF    _d_ptexextrastep
-		XREF    _d_sfracextrastep
-		XREF    _d_tfracextrastep
-		XREF    _d_lightextrastep
-		XREF    _d_ziextrastep
-		XREF    _d_pdestbasestep
-		XREF    _d_pzbasestep
-		XREF    _d_ptexbasestep
-		XREF    _d_sfracbasestep
-		XREF    _d_tfracbasestep
-		XREF    _d_lightbasestep
-		XREF    _d_zibasestep
 		XREF    _d_zwidth
 		XREF    _d_pzbuffer
 		XREF    _a_spans

@@ -16,7 +16,6 @@
 
 	code
 
-	xref    _Sys_Error
 	IFND	M881
 	IFD	STORMC
 	xref    _sin__r

@@ -12,11 +12,7 @@
 		ENDIF
 
 		XREF    _r_visframecount
-		XREF    _r_framecount
 		XREF    _r_currentkey
-		XREF    _r_drawpolys
-		XREF    _r_worldpolysbacktofront
-		XREF    _pfrustum_indexes
 		XREF    _modelorg
 		XREF    _vpn
 		XREF    _vright

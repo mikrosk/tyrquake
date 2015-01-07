@@ -33,7 +33,6 @@
 		XREF    _bbextentt
 		XREF    _transformed_modelorg
 		XREF    _miplevel
-		XREF    _cl_entities
 		XREF    _r_worldentity
 		XREF    _r_drawflat
 		XREF    _surfaces
